@@ -11,7 +11,7 @@ export class MailService {
             service: 'gmail',
             auth: {
                 user: this.configService.get<string>('SMTP_USERNAME'),
-                password: this.configService.get<string>('SMTP_PASSWORD')
+                pass: this.configService.get<string>('SMTP_PASSWORD')
             }
         });
 
