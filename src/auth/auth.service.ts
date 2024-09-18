@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { BadRequestException, ConflictException, HttpException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { CreateUserDto } from "src/user/dto/create-user.dto";
@@ -8,6 +8,7 @@ import * as bcrypt from "bcrypt";
 import hashPasswordHelper from "helper/hash-password.helper";
 import { totp } from 'otplib';
 import { MailService } from "src/common/mail/mail.service";
+import { ResetPasswordDto } from "./dto/reset-password.dto";
 
 @Injectable()
 export class AuthService {
@@ -123,5 +124,29 @@ export class AuthService {
         };
 
         throw new HttpException('OTP is invalid or expired', HttpStatus.UNAUTHORIZED);
+    }
+
+    async resetPassword(dto: ResetPasswordDto, isVerifiedOtp: boolean) {
+        const email = dto.email;
+        const newPassword = dto.newPassword;
+
+        const user = await this.userService.findOne({email: email, deleted: false});
+        if(!user) {
+            throw new NotFoundException('Email not found');
+        }
+
+        const comparePassword = bcrypt.compareSync(newPassword, user.password);
+        if(comparePassword) {
+            throw new ConflictException('New password cannot be the same as the current password');
+        } 
+
+        user.password = await hashPasswordHelper(newPassword);
+        await this.userService.save(user);
+
+        return {
+            "success": true,
+            "statusCode": HttpStatus.OK,
+            "message": "Reset password successfully."
+        }
     }
 }

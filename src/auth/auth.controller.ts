@@ -1,10 +1,11 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, DefaultValuePipe, Header, Headers, ParseBoolPipe, Post, Query } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { CreateUserDto } from "src/user/dto/create-user.dto";
 import { LoginUserDto } from "src/user/dto/login-user.dto";
 import { ApiBody, ApiTags } from "@nestjs/swagger";
 import { ForgotPasswordDto } from "./dto/forgot-password.dto";
 import { OtpPasswordDto } from "./dto/otp-password.dto";
+import { ResetPasswordDto } from "./dto/reset-password.dto";
 
 @ApiTags('Auth')
 @Controller('api/v1/auth')
@@ -35,5 +36,14 @@ export class AuthController {
     @Post('password/otp')    
     verifyOtp(@Body() dto: OtpPasswordDto ): any {
         return this.authService.verifyOtp(dto.otp, dto.email);
+    }
+
+    @Post('password/reset')
+    resetPassword(
+        @Body() dto: ResetPasswordDto, 
+        @Headers('isOtpVerified') isOtpVerified: string
+    ): any {
+        const isVerifiedOtp = isOtpVerified === 'true' ? true: false;
+        return this.authService.resetPassword(dto, isVerifiedOtp);
     }
 }
