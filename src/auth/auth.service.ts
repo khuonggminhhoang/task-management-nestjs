@@ -38,19 +38,19 @@ export class AuthService {
     }
 
     //--------//
-    async register(createUser: CreateUserDto) {
-        const pwd = await hashPasswordHelper(createUser.password);
+    async register(dto: CreateUserDto) {
+        const pwd = await hashPasswordHelper(dto.password);
         
-        return this.userService.save({...createUser, password: pwd});
+        return this.userService.save({...dto, password: pwd});
     }
 
-    async login(loginUser: LoginUserDto): Promise<any> {
-        const user = await this.userService.findOneByEmail(loginUser.email);
+    async login(dto: LoginUserDto): Promise<any> {
+        const user = await this.userService.findOneByEmail(dto.email);
         if(!user) {
             throw new HttpException("Email not existed", HttpStatus.UNAUTHORIZED);
         }
 
-        const checkPassword = await bcrypt.compare(loginUser.password, user.password);
+        const checkPassword = await bcrypt.compare(dto.password, user.password);
         if(!checkPassword) {
             throw new HttpException("Password error", HttpStatus.UNAUTHORIZED);
         }
@@ -96,8 +96,32 @@ export class AuthService {
                     FACEBOOK: <a href='https://www.facebook.com/khuongminhminh.hoang/'> [ADMIN]
             `
 
-        await this.mailService.sendMail(email, subject, html);
+        // this.mailService.sendMail(email, subject, html);
 
-        return otp;
+        return {
+            "success": true,
+            "statusCode": HttpStatus.OK,
+            "message": "Send mail successfully",
+            "data": {
+                otp: otp
+            }
+        };
+    }
+
+    verifyOtp(otp: string, email: string) {
+        const isValid = totp.verify({ token: otp, secret: this.configService.get<string>('OTP_SECRET_KEY') + email});
+
+        if(isValid) {
+            return {
+                "success": true,
+                "statusCode": HttpStatus.OK,
+                "message": "OTP is verified",
+                "data": {
+                    isOtpVerified: true
+                }
+            }
+        };
+
+        throw new HttpException('OTP is invalid or expired', HttpStatus.UNAUTHORIZED);
     }
 }
