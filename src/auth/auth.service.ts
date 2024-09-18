@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, HttpException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ConflictException, HttpException, HttpStatus, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { CreateUserDto } from "src/user/dto/create-user.dto";
@@ -9,6 +9,7 @@ import hashPasswordHelper from "helper/hash-password.helper";
 import { totp } from 'otplib';
 import { MailService } from "src/common/mail/mail.service";
 import { ResetPasswordDto } from "./dto/reset-password.dto";
+import { ChangePasswordDto } from "./dto/change-password.dto";
 
 @Injectable()
 export class AuthService {
@@ -87,6 +88,7 @@ export class AuthService {
         const secret = this.configService.get<string>('OTP_SECRET_KEY') + email;
         totp.options = { digits: 8, step: 60 };
         const otp = totp.generate(secret);
+
         const subject = '[TASK] OTP đổi mật khẩu'
         const html = `
                     Mã OTP của bạn: 
@@ -97,14 +99,15 @@ export class AuthService {
                     FACEBOOK: <a href='https://www.facebook.com/khuongminhminh.hoang/'> [ADMIN]
             `
 
-        // this.mailService.sendMail(email, subject, html);
+        this.mailService.sendMail(email, subject, html);
 
         return {
             "success": true,
             "statusCode": HttpStatus.OK,
             "message": "Send mail successfully",
             "data": {
-                otp: otp
+                otp: otp,
+                email: email
             }
         };
     }
@@ -126,9 +129,13 @@ export class AuthService {
         throw new HttpException('OTP is invalid or expired', HttpStatus.UNAUTHORIZED);
     }
 
-    async resetPassword(dto: ResetPasswordDto, isVerifiedOtp: boolean) {
+    async resetPassword(dto: ResetPasswordDto, isVerifiedOtp: boolean): Promise<any> {
         const email = dto.email;
         const newPassword = dto.newPassword;
+
+        if(!isVerifiedOtp) {
+            throw new UnauthorizedException('OTP is unauthorized');
+        }
 
         const user = await this.userService.findOne({email: email, deleted: false});
         if(!user) {
@@ -148,5 +155,29 @@ export class AuthService {
             "statusCode": HttpStatus.OK,
             "message": "Reset password successfully."
         }
+    }
+
+
+    async changePassword(dto: ChangePasswordDto): Promise<any> {
+        const email = dto.email;
+        const currentPassword = dto.currentPassword;
+        const newPassword = dto.newPassword;
+        const retryPassword = dto.retryPassword;
+        
+        const user = await this.userService.findOne({email: email, deleted: false});
+        if(!user) {
+            throw new HttpException('email not exist', HttpStatus.UNAUTHORIZED);
+        }
+
+        if(currentPassword == newPassword) {
+            throw new HttpException('New password cannot be the same as the current password', HttpStatus.CONFLICT);
+        }
+
+        if(newPassword != retryPassword) {
+            throw new HttpException('New password must be the same as the retry password', HttpStatus.CONFLICT);
+        }
+
+        return await this.forgotPassword(email);
+
     }
 }

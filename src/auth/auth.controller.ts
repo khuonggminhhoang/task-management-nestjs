@@ -6,6 +6,7 @@ import { ApiBody, ApiTags } from "@nestjs/swagger";
 import { ForgotPasswordDto } from "./dto/forgot-password.dto";
 import { OtpPasswordDto } from "./dto/otp-password.dto";
 import { ResetPasswordDto } from "./dto/reset-password.dto";
+import { ChangePasswordDto } from "./dto/change-password.dto";
 
 @ApiTags('Auth')
 @Controller('api/v1/auth')
@@ -42,8 +43,13 @@ export class AuthController {
     resetPassword(
         @Body() dto: ResetPasswordDto, 
         @Headers('isOtpVerified') isOtpVerified: string
-    ): any {
+    ): Promise<any> {
         const isVerifiedOtp = isOtpVerified === 'true' ? true: false;
         return this.authService.resetPassword(dto, isVerifiedOtp);
+    }
+
+    @Post('password/change')
+    changePassword(@Body() dto: ChangePasswordDto): Promise<any> {
+        return this.authService.changePassword(dto);
     }
 }
