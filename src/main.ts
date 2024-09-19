@@ -2,12 +2,11 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { ConfigService } from '@nestjs/config';
+import { config } from 'config/system.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const configService = app.get(ConfigService);
 
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
@@ -15,17 +14,19 @@ async function bootstrap() {
   }));
 
   // cài swagger
-  const config = new DocumentBuilder()
+  const configg = new DocumentBuilder()
     .setTitle('Task Management Project')
-    .setDescription('API')
+    .setDescription('API') 
     .setVersion('1.0')
     .addTag('User')
     .addTag('Auth')
+    .addTag('Task')
     .addBearerAuth()
     .build();
-  const document = SwaggerModule.createDocument(app, config);
+
+  const document = SwaggerModule.createDocument(app, configg);
   SwaggerModule.setup('api', app, document);  
 
-  await app.listen(configService.get<number>('PORT'));
+  await app.listen(config.PORT);
 }
 bootstrap();

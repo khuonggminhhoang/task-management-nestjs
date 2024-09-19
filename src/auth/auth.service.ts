@@ -1,5 +1,4 @@
 import { ConflictException, HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { CreateUserDto } from "src/user/dto/create-user.dto";
 import { LoginUserDto } from "src/user/dto/login-user.dto";
@@ -10,7 +9,7 @@ import { totp } from 'otplib';
 import { MailService } from "src/common/mail/mail.service";
 import { ResetPasswordDto } from "./dto/reset-password.dto";
 import { ChangePasswordDto } from "./dto/change-password.dto";
-import systemConfig from './../../config/system.config';
+import { config } from "config/system.config";
 
 @Injectable()
 export class AuthService {
@@ -18,18 +17,17 @@ export class AuthService {
         private jwtService: JwtService,
         private userService: UserService,
         private mailService: MailService,
-        private configService: ConfigService
     ) {}
 
     private async generateToken(payload: {id: number, email: string}) {
         const accessToken = await this.jwtService.signAsync(payload, {
-            secret: this.configService.get( systemConfig.accessTokenKey ),
-            expiresIn: systemConfig.expiresInAccessToken
+            secret: config.accessTokenKey,
+            expiresIn: config.expiresInAccessToken
         });
 
         const refreshToken = await this.jwtService.signAsync(payload, {
-            secret: this.configService.get(systemConfig.refreshTokenKey),
-            expiresIn: systemConfig.expiresInRefreshToken
+            secret: config.refreshTokenKey,
+            expiresIn: config.expiresInRefreshToken
         });
 
         await this.userService.update(payload.id, {refresh_token: refreshToken});
@@ -77,7 +75,7 @@ export class AuthService {
 
     async refreshToken(refresh_token: string): Promise<any> {
         try {
-            const verify = await this.jwtService.verifyAsync(refresh_token, {secret: this.configService.get<string>('REFRESH_TOKEN_KEY')});
+            const verify = await this.jwtService.verifyAsync(refresh_token, {secret: config.refreshTokenKey});
 
             const existed = await this.userService.findOne({email: verify.email, refresh_token: refresh_token});
             if(!existed) {
@@ -99,7 +97,7 @@ export class AuthService {
             throw new HttpException('email not exist', HttpStatus.UNAUTHORIZED);
         }
 
-        const secret = this.configService.get<string>(systemConfig.otpSecretKey) + email;
+        const secret = config.otpSecretKey + email;
         totp.options = { digits: 8, step: 60 };
         const otp = totp.generate(secret);
 
@@ -127,7 +125,7 @@ export class AuthService {
     }
 
     verifyOtp(otp: string, email: string) {
-        const isValid = totp.verify({ token: otp, secret: this.configService.get<string>(systemConfig.otpSecretKey) + email});
+        const isValid = totp.verify({ token: otp, secret: config.otpSecretKey + email});
 
         if(isValid) {
             return {
