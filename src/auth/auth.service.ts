@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, HttpException, HttpStatus, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { ConflictException, HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { CreateUserDto } from "src/user/dto/create-user.dto";
@@ -10,6 +10,7 @@ import { totp } from 'otplib';
 import { MailService } from "src/common/mail/mail.service";
 import { ResetPasswordDto } from "./dto/reset-password.dto";
 import { ChangePasswordDto } from "./dto/change-password.dto";
+import systemConfig from './../../config/system.config';
 
 @Injectable()
 export class AuthService {
@@ -22,28 +23,41 @@ export class AuthService {
 
     private async generateToken(payload: {id: number, email: string}) {
         const accessToken = await this.jwtService.signAsync(payload, {
-            secret: this.configService.get('ACCESS_TOKEN_KEY'),
-            expiresIn: '1d'
+            secret: this.configService.get( systemConfig.accessTokenKey ),
+            expiresIn: systemConfig.expiresInAccessToken
         });
 
         const refreshToken = await this.jwtService.signAsync(payload, {
-            secret: this.configService.get('REFRESH_TOKEN_KEY'),
-            expiresIn: '7d'
+            secret: this.configService.get(systemConfig.refreshTokenKey),
+            expiresIn: systemConfig.expiresInRefreshToken
         });
 
         await this.userService.update(payload.id, {refresh_token: refreshToken});
+        if (!accessToken || !refreshToken) {
+            throw new InternalServerErrorException('Token generation failed');
+        }        
 
         return {
-            accessToken: accessToken,
-            refreshToken: refreshToken
+            "success": true,
+            "statusCode": HttpStatus.CREATED,
+            "message": "Token generation successful",
+            "data": {
+                accessToken: accessToken,
+                refreshToken: refreshToken
+            }
         }
     }
 
     //--------//
     async register(dto: CreateUserDto) {
-        const pwd = await hashPasswordHelper(dto.password);
+        try {
+            const pwd = await hashPasswordHelper(dto.password);
+            return this.userService.save({...dto, password: pwd});
+        }
+        catch(err) {
+            throw new InternalServerErrorException('Register error');
+        }
         
-        return this.userService.save({...dto, password: pwd});
     }
 
     async login(dto: LoginUserDto): Promise<any> {
@@ -85,7 +99,7 @@ export class AuthService {
             throw new HttpException('email not exist', HttpStatus.UNAUTHORIZED);
         }
 
-        const secret = this.configService.get<string>('OTP_SECRET_KEY') + email;
+        const secret = this.configService.get<string>(systemConfig.otpSecretKey) + email;
         totp.options = { digits: 8, step: 60 };
         const otp = totp.generate(secret);
 
@@ -113,7 +127,7 @@ export class AuthService {
     }
 
     verifyOtp(otp: string, email: string) {
-        const isValid = totp.verify({ token: otp, secret: this.configService.get<string>('OTP_SECRET_KEY') + email});
+        const isValid = totp.verify({ token: otp, secret: this.configService.get<string>(systemConfig.otpSecretKey) + email});
 
         if(isValid) {
             return {
