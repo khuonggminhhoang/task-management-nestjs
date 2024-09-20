@@ -28,14 +28,14 @@ export class TaskController {
 
     // @UseGuards(AuthGuard)
     @Post('create')
-    create(@Body() createTask: CreateTaskDto, @UserDecorator('id') idUser: number): Promise<any> {
-        return this.taskService.create(idUser, createTask);   
+    create(@Body() dto: CreateTaskDto, @UserDecorator('id') idUser: number): Promise<any> {
+        return this.taskService.create(idUser, dto);   
     }
 
     // @UseGuards(AuthGuard)
     @Patch('update/:id')
-    update(@Param('id', ParseIntPipe) idTask: number, @Body() updateTask: UpdateTaskDto, @UserDecorator('id') idUser: number) {
-        return this.taskService.update(idTask, updateTask, idUser);
+    update(@Param('id', ParseIntPipe) idTask: number, @Body() dto: UpdateTaskDto, @UserDecorator('id') idUser: number) {
+        return this.taskService.update(idTask, dto, idUser);
     }
 
     // @UseGuards(AuthGuard)

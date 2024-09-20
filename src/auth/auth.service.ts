@@ -30,11 +30,6 @@ export class AuthService {
             expiresIn: config.expiresInRefreshToken
         });
 
-        await this.userService.update(payload.id, {refresh_token: refreshToken});
-        if (!accessToken || !refreshToken) {
-            throw new InternalServerErrorException('Token generation failed');
-        }        
-
         return {
             "success": true,
             "statusCode": HttpStatus.CREATED,
@@ -48,13 +43,8 @@ export class AuthService {
 
     //--------//
     async register(dto: CreateUserDto) {
-        try {
-            const pwd = await hashPasswordHelper(dto.password);
-            return this.userService.save({...dto, password: pwd});
-        }
-        catch(err) {
-            throw new InternalServerErrorException('Register error');
-        }
+        const pwd = await hashPasswordHelper(dto.password);
+        return this.userService.save({...dto, password: pwd});
         
     }
 
@@ -74,21 +64,17 @@ export class AuthService {
     }
 
     async refreshToken(refresh_token: string): Promise<any> {
-        try {
-            const verify = await this.jwtService.verifyAsync(refresh_token, {secret: config.refreshTokenKey});
+        const verify = await this.jwtService.verifyAsync(refresh_token, {secret: config.refreshTokenKey});
 
-            const existed = await this.userService.findOne({email: verify.email, refresh_token: refresh_token});
-            if(!existed) {
-                throw new HttpException("Refresh token is not valid", HttpStatus.BAD_REQUEST);
-            }
-            
-            const payload = {id: verify.id, email: verify.email};
-            // trả về accesstoken và refreshtoken
-            return this.generateToken(payload);
-        }
-        catch(error) {
+        const existed = await this.userService.findOne({email: verify.email, refresh_token: refresh_token});
+        if(!existed) {
             throw new HttpException("Refresh token is not valid", HttpStatus.BAD_REQUEST);
         }
+        
+        const payload = {id: verify.id, email: verify.email};
+        // trả về accesstoken và refreshtoken
+        return this.generateToken(payload);
+        
     }
 
     async forgotPassword(email: string): Promise<any> {

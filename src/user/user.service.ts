@@ -19,23 +19,27 @@ export class UserService {
         return password;
     }
 
+    //----------------------//
     // public method
-    async findAll(): Promise<User[]> {
-        return await this.userRepository.find({
+    async findAll(): Promise<any> {
+        const users = await this.userRepository.find({
             select: ['id', 'full_name', 'email', 'gender', 'createdAt', 'updatedAt']
         });
+
+        return {
+            "success": true,
+            "statusCode": HttpStatus.OK,
+            "message": "Resource created successfully",
+            "data": users
+        }
     }
 
-    async findOneById(id: number): Promise<User> {
-        try {
-            const user = await this.userRepository.findOne({ where: {id: id}});
-            if(!user) {
-                throw new HttpException("Not Found", HttpStatus.NOT_FOUND);
-            }
-            return user
-        } catch(error) {
-            throw new HttpException("Not Found", HttpStatus.NOT_FOUND);
+    async findOneById(id: number): Promise<any> {
+        const user = await this.userRepository.findOne({ where: {id: id}});
+        if(!user) {
+            throw new HttpException("Not Found User", HttpStatus.NOT_FOUND);
         }
+        return user;
     }
 
     async findOneByEmail(email: string): Promise<User> {
@@ -47,35 +51,33 @@ export class UserService {
     }
 
     async update(id: number, updateUser: any): Promise<UpdateResult> {
-        try {
-            return await this.userRepository.update({id: id}, {...updateUser, updatedAt: new Date()});
-        }   
-        catch {
-            throw new InternalServerErrorException();
-        }
+        return await this.userRepository.update({id: id}, {...updateUser, updatedAt: new Date()});
     }
 
     async save(createUser: CreateUserDto): Promise<any> {
         return await this.userRepository.save(createUser);
     }
 
-    async create(createUser: CreateUserDto): Promise<User> {
-        try {
-            const password = await this.hashPassword(createUser.password);
-            const newUser = await this.userRepository.save({...createUser, password: password});
-            return newUser;
-        }
-        catch(err) {
-            throw new HttpException("Create user failed", HttpStatus.BAD_REQUEST);
-        }
+    async create(createUser: CreateUserDto): Promise<any> {
+        const password = await this.hashPassword(createUser.password);
+        const newUser = await this.userRepository.save({...createUser, password: password});
+
+        return {
+            "success": true,
+            "statusCode": HttpStatus.CREATED,
+            "message": "Resource created successfully",
+            "data": newUser
+        };
+        
     }
 
-    async delete(id: number): Promise<DeleteResult> {
-        try {
-            return this.userRepository.update({id: id}, {deleted: true});
-        }
-        catch {
-            throw new HttpException("Delete user failed", HttpStatus.BAD_REQUEST);
+    async delete(id: number): Promise<any> {
+        await this.userRepository.update({id: id}, {deleted: true});
+
+        return {
+            "success": true,
+            "statusCode": HttpStatus.OK,
+            "message": "Resource deleted successfully"
         }
     }
     

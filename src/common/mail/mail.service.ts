@@ -1,11 +1,11 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { config } from "config/system.config";
 import * as nodemailer from "nodemailer";
 
 @Injectable()
 export class MailService {
 
-    sendMail(toEmail: string, subject: string, htmlContent: string) {
+    async sendMail(toEmail: string, subject: string, htmlContent: string) {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
@@ -21,15 +21,13 @@ export class MailService {
             html: htmlContent 
         }
 
-        transporter.sendMail(mailOptions, function (error, info) {
-            if (error) {
-                console.log("Lỗi gửi mail");
-                console.log(error);
-    
-            } else {
-                console.log('Email sent: ' + info.response);    
-                // do something useful
-            }
-        })
+        try {
+            const info = await transporter.sendMail(mailOptions);
+            console.log('Email sent: ' + info.response);
+            // do something useful
+        } catch (error) {
+            console.error("Send mail error:", error);
+            throw new InternalServerErrorException('Send mail failed');
+        }
     }
 }
