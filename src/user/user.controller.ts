@@ -2,7 +2,6 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGua
 import { UserService } from "./user.service";
 import { User } from "./entities/user.entity";
 import { UpdateUserDto } from "./dto/update-user.dto";
-// import { AuthGuard } from "src/auth/auth.guard";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { AuthGuard} from "@nestjs/passport";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";

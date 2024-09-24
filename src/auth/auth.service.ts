@@ -19,6 +19,16 @@ export class AuthService {
         private mailService: MailService,
     ) {}
 
+    // hàm xác thực user
+    async checkUser(payload: {id: number, email: string}): Promise<any> {
+        const user = await this.userService.findOne({id: payload.id, email: payload.email, deleted: false});
+        if(!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        return user;
+    }
+
     private async generateToken(payload: {id: number, email: string}) {
         const accessToken = await this.jwtService.signAsync(payload, {
             secret: config.accessTokenKey,
