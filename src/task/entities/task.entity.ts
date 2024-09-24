@@ -39,6 +39,6 @@ export class Task {
     @ManyToOne(() => Task, (task) => task.childTasks, { nullable: true, onDelete: 'CASCADE'})   // tự động xóa bản ghi là con khi task cha bị xóa
     parentTask: Task;
 
-    @ManyToMany(() => User, (user) => user.tasks)
+    @ManyToMany(() =>User, (user) => user.tasks)
     users: User[];
 }

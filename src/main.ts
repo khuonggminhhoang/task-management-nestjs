@@ -8,7 +8,6 @@ import { AllExceptionsFilter } from 'filter/all-exception.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     transform: true           // nếu dùng transform: true sẽ tự động chuyển đổi các đối tượng plain (plain objects) từ request body thành instance của các class   
