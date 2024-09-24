@@ -1,12 +1,12 @@
 import { Body, Controller, DefaultValuePipe, Header, Headers, ParseBoolPipe, Post, Query } from "@nestjs/common";
-import { AuthService } from "./auth.service";
-import { CreateUserDto } from "src/user/dto/create-user.dto";
-import { LoginUserDto } from "src/user/dto/login-user.dto";
+import { AuthService } from "@/auth/auth.service";
+import { CreateUserDto } from "@/user/dto/create-user.dto";
+import { LoginUserDto } from "@/user/dto/login-user.dto";
 import { ApiBody, ApiTags } from "@nestjs/swagger";
-import { ForgotPasswordDto } from "./dto/forgot-password.dto";
-import { OtpPasswordDto } from "./dto/otp-password.dto";
-import { ResetPasswordDto } from "./dto/reset-password.dto";
-import { ChangePasswordDto } from "./dto/change-password.dto";
+import { ForgotPasswordDto } from "@/auth/dto/forgot-password.dto";
+import { OtpPasswordDto } from "@/auth/dto/otp-password.dto";
+import { ResetPasswordDto } from "@/auth/dto/reset-password.dto";
+import { ChangePasswordDto } from "@/auth/dto/change-password.dto";
 
 @ApiTags('Auth')
 @Controller('api/v1/auth')

@@ -1,4 +1,4 @@
-import { Task } from "src/task/entities/task.entity";
+import { Task } from "@/task/entities/task.entity";
 import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()

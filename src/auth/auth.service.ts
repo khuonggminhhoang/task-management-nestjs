@@ -1,14 +1,14 @@
 import { ConflictException, HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { CreateUserDto } from "src/user/dto/create-user.dto";
-import { LoginUserDto } from "src/user/dto/login-user.dto";
-import { UserService } from "src/user/user.service";
+import { CreateUserDto } from "@/user/dto/create-user.dto";
+import { LoginUserDto } from "@/user/dto/login-user.dto";
+import { UserService } from "@/user/user.service";
 import * as bcrypt from "bcrypt";
 import hashPasswordHelper from "helper/hash-password.helper";
 import { totp } from 'otplib';
-import { MailService } from "src/common/mail/mail.service";
-import { ResetPasswordDto } from "./dto/reset-password.dto";
-import { ChangePasswordDto } from "./dto/change-password.dto";
+import { MailService } from "@/common/mail/mail.service";
+import { ResetPasswordDto } from "@/auth/dto/reset-password.dto";
+import { ChangePasswordDto } from "@/auth/dto/change-password.dto";
 import { config } from "config/system.config";
 
 @Injectable()
@@ -20,7 +20,7 @@ export class AuthService {
     ) {}
 
     // hàm xác thực user
-    async checkUser(payload: {id: number, email: string}): Promise<any> {
+    public async checkUser(payload: {id: number, email: string}): Promise<any> {
         const user = await this.userService.findOne({id: payload.id, email: payload.email, deleted: false});
         if(!user) {
             throw new NotFoundException('User not found');
@@ -107,7 +107,7 @@ export class AuthService {
                     FACEBOOK: <a href='https://www.facebook.com/khuongminhminh.hoang/'> [ADMIN]
             `
 
-        this.mailService.sendMail(email, subject, html);
+        await this.mailService.sendMail(email, subject, html);
 
         return {
             "success": true,

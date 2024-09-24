@@ -1,13 +1,13 @@
 import { BadRequestException, HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
-import { CreateTaskDto } from "./dto/create-task.dto";
+import { CreateTaskDto } from "@/task/dto/create-task.dto";
 import { Repository } from "typeorm";
-import { Task } from "./entities/task.entity";
+import { Task } from "@/task/entities/task.entity";
 import { InjectRepository } from "@nestjs/typeorm";
-import { User } from "src/user/entities/user.entity";
-import { FindTaskDto } from "./dto/find-task.dto";
-import { PaginationTaskDto } from "./dto/pagination-task.dto";
+import { User } from "@/user/entities/user.entity";
+import { FindTaskDto } from "@/task/dto/find-task.dto";
+import { PaginationTaskDto } from "@/task/dto/pagination-task.dto";
 import { paginationHelper } from "helper/pagination.helper";
-import { UpdateTaskDto } from "./dto/update-task.dto";
+import { UpdateTaskDto } from "@/task/dto/update-task.dto";
 
 @Injectable()
 export class TaskService {
@@ -66,7 +66,7 @@ export class TaskService {
             }
         }
         
-        const task = await this.taskRepository.create({...dto, created_by: idUser});
+        const task = this.taskRepository.create({...dto, created_by: idUser});
         task.parentTask = parentTask != null ? parentTask : null;
 
         // khai báo mảng ban đầu cho task.users vì Mảng task.users không được khởi tạo khi tạo một task mới bằng this.taskRepository.create(), vì mối quan hệ ManyToMany giữa Task và User chỉ được thiết lập sau khi lưu task vào cơ sở dữ liệu.

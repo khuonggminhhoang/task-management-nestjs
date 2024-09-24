@@ -3,7 +3,7 @@ import { Injectable, NotFoundException, UnauthorizedException, UseFilters } from
 @Injectable()
 export class AppService {
   getHello(): string {
-    throw new NotFoundException();
+    // throw new NotFoundException();
     return 'Hello World!';
   }
 }

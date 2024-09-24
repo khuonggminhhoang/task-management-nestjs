@@ -10,13 +10,13 @@ import {
     Query,
     UseGuards
 } from "@nestjs/common";
-import { TaskService } from "./task.service";
+import { TaskService } from "@/task/task.service";
 import  { AuthGuard} from "@nestjs/passport";
-import { CreateTaskDto } from "./dto/create-task.dto";
-import { UserDecorator } from "src/user/decorator/user.decorator";
-import { FindTaskDto } from "./dto/find-task.dto";
-import { PaginationTaskDto } from "./dto/pagination-task.dto";
-import { UpdateTaskDto } from "./dto/update-task.dto";
+import { CreateTaskDto } from "@/task/dto/create-task.dto";
+import { UserDecorator } from "@/user/decorator/user.decorator";
+import { FindTaskDto } from "@/task/dto/find-task.dto";
+import { PaginationTaskDto } from "@/task/dto/pagination-task.dto";
+import { UpdateTaskDto } from "@/task/dto/update-task.dto";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
 @ApiBearerAuth()
@@ -28,7 +28,6 @@ export class TaskController {
 
     @Get()
     findAll(@UserDecorator('id') idUser: number, @Query() findTaskDto: FindTaskDto, @Query() pagiationTaskDto: PaginationTaskDto): Promise<any> {
-        // console.log(req.user); tại sao lại là .user??
         return this.taskService.findAll(idUser, findTaskDto, pagiationTaskDto);
     }
 
