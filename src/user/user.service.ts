@@ -6,12 +6,11 @@ import { CreateUserDto } from "@/user/dto/create-user.dto";
 import * as bcrypt from 'bcrypt';
 import {BaseService} from "@/base/service/baseService";
 import {UpdateUserDto} from "@/user/dto/update-user.dto";
-import {instanceToInstance, instanceToPlain} from "class-transformer";
 
 @Injectable()
 export class UserService extends BaseService<User>{
     constructor(
-        @InjectRepository(User) 
+        @InjectRepository(User)
         private userRepository: Repository<User>,
     ) {
         super(userRepository);
@@ -24,23 +23,8 @@ export class UserService extends BaseService<User>{
         return password;
     }
 
-    //----------------------//
-    // public method
-
-
-
-    async findAll(): Promise<any> {
-        const users = await super.findAll({});
-
-        return {
-            "success": true,
-            "statusCode": HttpStatus.OK,
-            "message": "Data retrieved successfully",
-            "data": instanceToPlain(users)
-        }
-
-    }
-
+    // get all user ở baseService có rồi
+    // Read detail, chỉ cần override hàm pre của base service, hàm findOne ở baseService có rồi
     async actionPreFindOne(id: number) {
         const user = await this.userRepository.findOne({ where: {id: id}});
         if(!user) {
@@ -50,59 +34,19 @@ export class UserService extends BaseService<User>{
         return id;
     }
 
-    async findOneById(id: number): Promise<any> {
-        const user = await super.findOne(id);
-        return {
-            "success": true,
-            "statusCode": HttpStatus.OK,
-            "message": "Data retrieved successfully",
-            "data": instanceToInstance(user)
-        }
-    }
-
-    async findOneByEmail(email: string): Promise<User> {
-        return await this.userRepository.findOne({ where: {email: email, deleted: false}});
-    }
-
-    async findOne(find: object): Promise<User> {
-        return await this.userRepository.findOne({ where: find})
-    }
-
-    // update
+    // update, tương tự
     async actionPreUpdate(dto: UpdateUserDto) {
         return {...dto, updatedAt: new Date()};
     }
 
-    async update(id: number, dto: UpdateUserDto): Promise<any> {
-        await super.update(id, dto);
-        return {
-            "success": true,
-            "statusCode": HttpStatus.OK,
-            "message": "Resource updated successfully"
-        }
-    }
 
-    async save(createUser: CreateUserDto): Promise<any> {
-        return await this.userRepository.save(createUser);
-    }
-
+    // create, tương tự
     async actionPreCreate(dto: CreateUserDto) {
         const password = await this.hashPassword(dto.password);
         return {...dto, password: password};
     }
 
-    async create(dto: CreateUserDto): Promise<any> {
-        const newUser = await super.create(dto);
-
-        return {
-            "success": true,
-            "statusCode": HttpStatus.CREATED,
-            "message": "Resource created successfully",
-            "data": instanceToPlain(newUser)
-        };
-        
-    }
-
+    // delete, tương tự
     async actionPreDelete(id: number) {
         const existedUser = await this.userRepository.findOne({where: {id: id}});
         if(!existedUser) {
@@ -111,15 +55,13 @@ export class UserService extends BaseService<User>{
         return id;
     }
 
-    async delete(id: number): Promise<any> {
-        await super.delete(id);
-
-        return {
-            "success": true,
-            "statusCode": HttpStatus.OK,
-            "message": "Resource deleted successfully"
-        }
+    // gen function
+    async findOneElement(find: object): Promise<User> {
+        return await this.userRepository.findOne({ where: find})
     }
-    
-}
 
+    async save(createUser: CreateUserDto): Promise<any> {
+        return await this.userRepository.save(createUser);
+    }
+
+}

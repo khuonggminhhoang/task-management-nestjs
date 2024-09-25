@@ -21,7 +21,7 @@ export class AuthService {
 
     // hàm xác thực user
     public async checkUser(payload: {id: number, email: string}): Promise<any> {
-        const user = await this.userService.findOne({id: payload.id, email: payload.email, deleted: false});
+        const user = await this.userService.findOneElement({id: payload.id, email: payload.email, deleted: false});
         if(!user) {
             throw new NotFoundException('User not found');
         }
@@ -59,7 +59,7 @@ export class AuthService {
     }
 
     async login(dto: LoginUserDto): Promise<any> {
-        const user = await this.userService.findOneByEmail(dto.email);
+        const user = await this.userService.findOneElement({email: dto.email});
         if(!user) {
             throw new HttpException("Email not existed", HttpStatus.UNAUTHORIZED);
         }
@@ -76,7 +76,7 @@ export class AuthService {
     async refreshToken(refresh_token: string): Promise<any> {
         const verify = await this.jwtService.verifyAsync(refresh_token, {secret: config.refreshTokenKey});
 
-        const existed = await this.userService.findOne({email: verify.email, refresh_token: refresh_token});
+        const existed = await this.userService.findOneElement({email: verify.email, refresh_token: refresh_token});
         if(!existed) {
             throw new HttpException("Refresh token is not valid", HttpStatus.BAD_REQUEST);
         }
@@ -88,7 +88,7 @@ export class AuthService {
     }
 
     async forgotPassword(email: string): Promise<any> {
-        const user = await this.userService.findOne({email: email, deleted: false});
+        const user = await this.userService.findOneElement({email: email, deleted: false});
         if(!user) {
             throw new HttpException('email not exist', HttpStatus.UNAUTHORIZED);
         }
@@ -145,7 +145,7 @@ export class AuthService {
             throw new UnauthorizedException('OTP is unauthorized');
         }
 
-        const user = await this.userService.findOne({email: email, deleted: false});
+        const user = await this.userService.findOneElement({email: email, deleted: false});
         if(!user) {
             throw new NotFoundException('Email not found');
         }
@@ -172,7 +172,7 @@ export class AuthService {
         const newPassword = dto.newPassword;
         const retryPassword = dto.retryPassword;
         
-        const user = await this.userService.findOne({email: email, deleted: false});
+        const user = await this.userService.findOneElement({email: email, deleted: false});
         if(!user) {
             throw new HttpException('email not exist', HttpStatus.UNAUTHORIZED);
         }

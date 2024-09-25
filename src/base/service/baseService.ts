@@ -1,4 +1,5 @@
-import {Injectable} from "@nestjs/common";
+import {HttpStatus, Injectable} from "@nestjs/common";
+import {instanceToPlain} from "class-transformer";
 
 @Injectable()
 export class BaseService<T> {
@@ -18,7 +19,14 @@ export class BaseService<T> {
 
         const record = await this.repository.save(handleDto);
 
-        return this.actionPostCreate(record);
+        const element = await this.actionPostCreate(record);
+
+        return {
+            "success": true,
+            "statusCode": HttpStatus.CREATED,
+            "message": "Resource created successfully",
+            "data": instanceToPlain(element)
+        };
     }
 
     // read
@@ -35,7 +43,14 @@ export class BaseService<T> {
 
         const records = await this.repository.find({...handleDto, deleted: false});
 
-        return this.actionGetFindAll(records);
+        const array = await this.actionGetFindAll(records);
+
+        return {
+            "success": true,
+            "statusCode": HttpStatus.OK,
+            "message": "Data retrieved successfully",
+            "data": instanceToPlain(array)
+        }
     }
 
     // read detail
@@ -52,7 +67,14 @@ export class BaseService<T> {
 
         const record = await this.repository.findOne({where: {id: handleId, deleted: false}});
 
-        return this.actionGetFindOne(record);
+        const element = await this.actionGetFindOne(record);
+
+        return {
+            "success": true,
+            "statusCode": HttpStatus.OK,
+            "message": "Data retrieved successfully",
+            "data": instanceToPlain(element)
+        }
     }
 
     // update
@@ -69,7 +91,13 @@ export class BaseService<T> {
 
         const record = await this.repository.update({id: id}, handleDto);
 
-        return this.actionPatchUpdate(record);
+        await this.actionPatchUpdate(record);
+
+        return {
+            "success": true,
+            "statusCode": HttpStatus.OK,
+            "message": "Resource updated successfully"
+        }
     }
 
     // delete
@@ -85,6 +113,12 @@ export class BaseService<T> {
 
         await this.repository.delete(handleId);
 
-        return this.actionDelete();
+        await this.actionDelete();
+
+        return {
+            "success": true,
+            "statusCode": HttpStatus.OK,
+            "message": "Resource deleted successfully"
+        }
     }
 }

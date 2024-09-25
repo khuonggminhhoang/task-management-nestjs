@@ -14,13 +14,13 @@ export class UserController {
     constructor(private readonly userService: UserService) {}
 
     @Get()
-    findAll(): Promise<User[]> {
-        return this.userService.findAll();
+    findAll(): Promise<any> {
+        return this.userService.findAll({});
     }
 
     @Get('detail/:id')
-    findOne(@Param('id', ParseIntPipe) id: number): Promise<User> {
-        return this.userService.findOneById(id);
+    findOne(@Param('id', ParseIntPipe) id: number): Promise<any> {
+        return this.userService.findOne(id);
     }
 
     @Patch('update/:id')

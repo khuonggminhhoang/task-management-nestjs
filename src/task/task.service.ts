@@ -8,6 +8,7 @@ import { FindTaskDto } from "@/task/dto/find-task.dto";
 import { PaginationTaskDto } from "@/task/dto/pagination-task.dto";
 import { paginationHelper } from "helper/pagination.helper";
 import { UpdateTaskDto } from "@/task/dto/update-task.dto";
+import {BaseService} from "@/base/service/baseService";
 
 @Injectable()
 export class TaskService {
@@ -16,7 +17,11 @@ export class TaskService {
         @InjectRepository(User) private userRepository: Repository<User>
     ) {}
 
+    // async actionP
+
     async findAll(idUser: number, findTaskDto: FindTaskDto, paginationTaskDto: PaginationTaskDto): Promise<any> {
+        const test = {id: idUser, ...findTaskDto, ...paginationTaskDto};
+
         findTaskDto.keyword = findTaskDto.keyword || '';
         findTaskDto.order = findTaskDto.order || 'ASC';
         findTaskDto.sortBy = findTaskDto.sortBy || 'createdAt';
