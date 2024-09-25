@@ -65,6 +65,7 @@ export class TaskService {
                 throw new HttpException("Not Found Parent Task", HttpStatus.NOT_FOUND);
             }
         }
+
         
         const task = this.taskRepository.create({...dto, created_by: idUser});
         task.parentTask = parentTask != null ? parentTask : null;

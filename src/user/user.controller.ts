@@ -13,32 +13,27 @@ import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
-    // @UseGuards(AuthGuard)
     @Get()
     findAll(): Promise<User[]> {
         return this.userService.findAll();
     }
 
     @Get('detail/:id')
-    // @UseGuards(AuthGuard)
     findOne(@Param('id', ParseIntPipe) id: number): Promise<User> {
         return this.userService.findOneById(id);
     }
 
     @Patch('update/:id')
-    // @UseGuards(AuthGuard)
-    update(@Param('id', ParseIntPipe) id: number, @Body() updateUser: UpdateUserDto): Promise<any> {
-        return this.userService.update(id, updateUser);
+    update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateUserDto): Promise<any> {
+        return this.userService.update(id, dto);
     }
 
-    // @UseGuards(AuthGuard)
     @Post('create')
-    create(@Body() createUser: CreateUserDto): Promise<any> {
-        return this.userService.create(createUser);
+    create(@Body() dto: CreateUserDto): Promise<any> {
+        return this.userService.create(dto);
     }
 
     @Delete('delete/:id')
-    // @UseGuards(AuthGuard)
     delete(@Param('id',ParseIntPipe) id: number): Promise<any> {
         return this.userService.delete(id);
     }

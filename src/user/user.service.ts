@@ -1,16 +1,21 @@
-import { HttpException, HttpStatus, Injectable, InternalServerErrorException } from "@nestjs/common";
+import {HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "@/user/entities/user.entity";
 import { DeleteResult, Repository, UpdateResult } from "typeorm";
 import { CreateUserDto } from "@/user/dto/create-user.dto";
 import * as bcrypt from 'bcrypt';
+import {BaseService} from "@/base/service/baseService";
+import {UpdateUserDto} from "@/user/dto/update-user.dto";
+import {instanceToInstance, instanceToPlain} from "class-transformer";
 
 @Injectable()
-export class UserService {
+export class UserService extends BaseService<User>{
     constructor(
         @InjectRepository(User) 
         private userRepository: Repository<User>,
-    ) {}
+    ) {
+        super(userRepository);
+    }
 
     // private method
     private async hashPassword(plaintextPassword: string): Promise<string> {
@@ -21,25 +26,38 @@ export class UserService {
 
     //----------------------//
     // public method
+
+
+
     async findAll(): Promise<any> {
-        const users = await this.userRepository.find({
-            select: ['id', 'full_name', 'email', 'gender', 'createdAt', 'updatedAt']
-        });
+        const users = await super.findAll({});
 
         return {
             "success": true,
             "statusCode": HttpStatus.OK,
-            "message": "Resource created successfully",
-            "data": users
+            "message": "Data retrieved successfully",
+            "data": instanceToPlain(users)
         }
+
     }
 
-    async findOneById(id: number): Promise<any> {
+    async actionPreFindOne(id: number) {
         const user = await this.userRepository.findOne({ where: {id: id}});
         if(!user) {
             throw new HttpException("Not Found User", HttpStatus.NOT_FOUND);
         }
-        return user;
+
+        return id;
+    }
+
+    async findOneById(id: number): Promise<any> {
+        const user = await super.findOne(id);
+        return {
+            "success": true,
+            "statusCode": HttpStatus.OK,
+            "message": "Data retrieved successfully",
+            "data": instanceToInstance(user)
+        }
     }
 
     async findOneByEmail(email: string): Promise<User> {
@@ -50,29 +68,51 @@ export class UserService {
         return await this.userRepository.findOne({ where: find})
     }
 
-    async update(id: number, updateUser: any): Promise<UpdateResult> {
-        return await this.userRepository.update({id: id}, {...updateUser, updatedAt: new Date()});
+    // update
+    async actionPreUpdate(dto: UpdateUserDto) {
+        return {...dto, updatedAt: new Date()};
+    }
+
+    async update(id: number, dto: UpdateUserDto): Promise<any> {
+        await super.update(id, dto);
+        return {
+            "success": true,
+            "statusCode": HttpStatus.OK,
+            "message": "Resource updated successfully"
+        }
     }
 
     async save(createUser: CreateUserDto): Promise<any> {
         return await this.userRepository.save(createUser);
     }
 
-    async create(createUser: CreateUserDto): Promise<any> {
-        const password = await this.hashPassword(createUser.password);
-        const newUser = await this.userRepository.save({...createUser, password: password});
+    async actionPreCreate(dto: CreateUserDto) {
+        const password = await this.hashPassword(dto.password);
+        return {...dto, password: password};
+    }
+
+    async create(dto: CreateUserDto): Promise<any> {
+        const newUser = await super.create(dto);
 
         return {
             "success": true,
             "statusCode": HttpStatus.CREATED,
             "message": "Resource created successfully",
-            "data": newUser
+            "data": instanceToPlain(newUser)
         };
         
     }
 
+    async actionPreDelete(id: number) {
+        const existedUser = await this.userRepository.findOne({where: {id: id}});
+        if(!existedUser) {
+            throw new NotFoundException("Not found user");
+        }
+        return id;
+    }
+
     async delete(id: number): Promise<any> {
-        await this.userRepository.update({id: id}, {deleted: true});
+        await super.delete(id);
 
         return {
             "success": true,

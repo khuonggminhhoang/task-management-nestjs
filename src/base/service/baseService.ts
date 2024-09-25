@@ -2,7 +2,7 @@ import {Injectable} from "@nestjs/common";
 
 @Injectable()
 export class BaseService<T> {
-    constructor(private readonly repository) {}
+    constructor(protected readonly repository) {}
 
     // create
     async actionPreCreate(dto: Partial<T>) {
@@ -14,7 +14,7 @@ export class BaseService<T> {
     }
 
     async create(dto: Partial<T>) {
-        const handleDto = this.actionPreCreate(dto);
+        const handleDto =await this.actionPreCreate(dto);
 
         const record = await this.repository.save(handleDto);
 
@@ -33,7 +33,7 @@ export class BaseService<T> {
     async findAll(dto: any) {
         const handleDto = await this.actionPreFindAll(dto);
 
-        const records = await this.repository.find(handleDto);
+        const records = await this.repository.find({...handleDto, deleted: false});
 
         return this.actionGetFindAll(records);
     }
