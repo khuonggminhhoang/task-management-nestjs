@@ -1,14 +1,13 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { CreateTaskDto } from "@/task/dto/create-task.dto";
 import { Repository } from "typeorm";
 import { Task } from "@/task/entities/task.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "@/user/entities/user.entity";
-import { FindTaskDto } from "@/task/dto/find-task.dto";
-import { PaginationTaskDto } from "@/task/dto/pagination-task.dto";
 import { paginationHelper } from "helper/pagination.helper";
 import { UpdateTaskDto } from "@/task/dto/update-task.dto";
-import {BaseService} from "@/base/service/baseService";
+import {instanceToPlain} from "class-transformer";
+import {OptionTaskDto} from "@/task/dto/option-task.dto";
 
 @Injectable()
 export class TaskService {
@@ -17,15 +16,11 @@ export class TaskService {
         @InjectRepository(User) private userRepository: Repository<User>
     ) {}
 
-    // async actionP
+    async findAllTask(idUser: number,dto: OptionTaskDto) {
+        dto.keyword = dto.keyword || '';
+        dto.order = dto.order || 'ASC';
+        dto.sortBy = dto.sortBy || 'createdAt';
 
-    async findAll(idUser: number, findTaskDto: FindTaskDto, paginationTaskDto: PaginationTaskDto): Promise<any> {
-        const test = {id: idUser, ...findTaskDto, ...paginationTaskDto};
-
-        findTaskDto.keyword = findTaskDto.keyword || '';
-        findTaskDto.order = findTaskDto.order || 'ASC';
-        findTaskDto.sortBy = findTaskDto.sortBy || 'createdAt';
-        
         const [_, countRecord] = await this.taskRepository.findAndCount({
             where: {
                 deleted: false,
@@ -33,17 +28,17 @@ export class TaskService {
             }
         });
 
-        const pagination = paginationHelper(paginationTaskDto, countRecord);
-        
+        const pagination = paginationHelper({ limit: dto.limit, page: dto.page}, countRecord);
+
         const tasks = await this.taskRepository
-                        .createQueryBuilder('task')
-                        .where('deleted = :deleted', { deleted: false })
-                        .andWhere('created_by = :idUser', { idUser })
-                        .andWhere(`LOWER(title) LIKE LOWER(:keyword)`, { keyword: `%${findTaskDto.keyword}%` })
-                        .orderBy( findTaskDto.sortBy, findTaskDto.order)
-                        .skip(pagination['skip'])
-                        .take(pagination['limit'])          // không dùng limit vì nó chỉ lấy ra n bản ghi từ đầu db thôi
-                        .getMany();
+            .createQueryBuilder('task')
+            .where('deleted = :deleted', { deleted: false })
+            .andWhere('created_by = :idUser', { idUser: idUser })
+            .andWhere(`LOWER(title) LIKE LOWER(:keyword)`, { keyword: `%${dto.keyword}%` })
+            .orderBy( dto.sortBy, dto.order)
+            .skip(pagination['skip'])
+            .take(pagination['limit'])          // không dùng limit vì nó chỉ lấy ra n bản ghi từ đầu db thôi
+            .getMany();
 
         return {
             "success": true,
@@ -54,10 +49,9 @@ export class TaskService {
                 tasks: tasks
             }
         };
-        
     }
 
-    async create(idUser: number, dto: CreateTaskDto): Promise<any> {
+    async createTask(idUser: number, dto: CreateTaskDto): Promise<any> {
         let parentTask = null;
 
         if(dto.parentTaskId) {
@@ -71,7 +65,7 @@ export class TaskService {
             }
         }
 
-        
+
         const task = this.taskRepository.create({...dto, created_by: idUser});
         task.parentTask = parentTask != null ? parentTask : null;
 
@@ -88,7 +82,7 @@ export class TaskService {
                     throw new HttpException('Not found user', HttpStatus.NOT_FOUND);
                 }
 
-                task.users = task.users || [];  
+                task.users = task.users || [];
                 task.users.push(user);
 
             }
@@ -105,9 +99,8 @@ export class TaskService {
 
     }
 
-    async findOne(idTask: number, idUser: number): Promise<any> {
+    async findOne({idTask, idUser}): Promise<any> {
         const task = await this.taskRepository.findOne({
-            select: ['id', 'title', 'status', 'content', 'time_start', 'time_finish', 'createdAt', 'updatedAt', 'parentTask'],
             where: {
                 id: idTask,
                 deleted: false,
@@ -115,21 +108,21 @@ export class TaskService {
             }
         });
 
-        // return task;
         return {
             "success": true,
             "statusCode": HttpStatus.OK,
             "message": "Data retrieved successfully",
-            "data": task
+            "data": instanceToPlain(task)
         }
     }
 
-    async update(idTask: number, dto: UpdateTaskDto, idUser: number): Promise<any> {
+
+    async updateTask(idTask: number, dto: UpdateTaskDto, idUser: number): Promise<any> {
         const task = await this.taskRepository.findOne({
             where: {
                 id: idTask,
                 deleted: false,
-                created_by: idUser  
+                created_by: idUser
             },
             relations: ['users']
         });
@@ -145,17 +138,20 @@ export class TaskService {
                     id: dto.parentTaskId
                 }
             });
-        }        
+        }
 
-        task.title = dto.title ?? task.title;        // null hoặc undefined thì lấy exp2, ko thì lấy exp1 
+        task.title = dto.title ?? task.title;        // null hoặc undefined thì lấy exp2, ko thì lấy exp1
         task.status = dto.status ?? task.status;
         task.content = dto.content ?? task.content;
         task.parentTask = parentTask ?? task.parentTask;
-        
+
         if(dto.assigned_to && dto.assigned_to.length > 0) {
             for( let idUser of dto.assigned_to) {
                 const user = await this.userRepository.findOne({ where: {id: idUser, deleted: false}});
-                task.users.push(user);
+
+                if(user) {
+                    task.users.push(user);
+                }
             }
         }
 
@@ -165,7 +161,7 @@ export class TaskService {
                 task.users = task.users.filter((item) => item.id != user.id );
             }
         }
-        
+
         const update =await this.taskRepository.save(task);
         return {
             "success": true,
@@ -175,7 +171,7 @@ export class TaskService {
         }
     }
 
-    async delete(idTask: number, idUser: number): Promise<any> {
+    async deleteTask(idTask: number, idUser: number): Promise<any> {
         const task = await this.taskRepository.findOne({
             where: {
                 id: idTask,
@@ -184,9 +180,13 @@ export class TaskService {
             },
             relations: ['users']
         });
-        
+
+        if (!task) {
+            throw new NotFoundException("User is not allowed to delete the record")
+        }
+
         await this.taskRepository.remove(task);
-        
+
         return {
             "success": true,
             "statusCode": HttpStatus.OK,

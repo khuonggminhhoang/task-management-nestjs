@@ -132,7 +132,7 @@ export class AuthService {
                     isOtpVerified: true
                 }
             }
-        };
+        }
 
         throw new HttpException('OTP is invalid or expired', HttpStatus.UNAUTHORIZED);
     }

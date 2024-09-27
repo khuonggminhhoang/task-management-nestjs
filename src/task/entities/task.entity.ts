@@ -1,5 +1,6 @@
 import { User } from "@/user/entities/user.entity";
 import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import {Exclude} from "class-transformer";
 
 @Entity()
 export class Task {
@@ -22,9 +23,11 @@ export class Task {
     time_finish: Date;
 
     @Column({ default: false})
+    @Exclude()
     deleted: boolean;
 
     @Column()
+    @Exclude()
     created_by: number;
 
     @CreateDateColumn()
@@ -34,11 +37,14 @@ export class Task {
     updatedAt: Date;
 
     @OneToMany(() => Task, (task) => task.parentTask, {nullable: true})
+    @Exclude()
     childTasks: Task[];
 
     @ManyToOne(() => Task, (task) => task.childTasks, { nullable: true, onDelete: 'CASCADE'})   // tự động xóa bản ghi là con khi task cha bị xóa
+    @Exclude()
     parentTask: Task;
 
     @ManyToMany(() =>User, (user) => user.tasks)
+    @Exclude()
     users: User[];
 }

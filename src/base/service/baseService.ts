@@ -30,7 +30,7 @@ export class BaseService<T> {
     }
 
     // read
-    async actionPreFindAll(dto: any) {
+    async actionPreFindAll(dto: Partial<T>) {
         return dto;
     }
 
@@ -38,7 +38,7 @@ export class BaseService<T> {
         return records;
     }
 
-    async findAll(dto: any) {
+    async findAll(dto: Partial<T>) {
         const handleDto = await this.actionPreFindAll(dto);
 
         const records = await this.repository.find({...handleDto, deleted: false});

@@ -1,21 +1,9 @@
-import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    Param,
-    ParseIntPipe,
-    Patch,
-    Post,
-    Query,
-    UseGuards
-} from "@nestjs/common";
+import {Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { TaskService } from "@/task/task.service";
 import  { AuthGuard} from "@nestjs/passport";
 import { CreateTaskDto } from "@/task/dto/create-task.dto";
 import { UserDecorator } from "@/user/decorator/user.decorator";
-import { FindTaskDto } from "@/task/dto/find-task.dto";
-import { PaginationTaskDto } from "@/task/dto/pagination-task.dto";
+import { OptionTaskDto } from "@/task/dto/option-task.dto";
 import { UpdateTaskDto } from "@/task/dto/update-task.dto";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
@@ -27,27 +15,27 @@ export class TaskController {
     constructor(private readonly taskService: TaskService ) {}
 
     @Get()
-    findAll(@UserDecorator('id') idUser: number, @Query() findTaskDto: FindTaskDto, @Query() pagiationTaskDto: PaginationTaskDto): Promise<any> {
-        return this.taskService.findAll(idUser, findTaskDto, pagiationTaskDto);
+    findAll(@UserDecorator('id') idUser: number, @Query() dto: OptionTaskDto): Promise<any> {
+        return this.taskService.findAllTask(idUser, dto);
     }
 
     @Get('detail/:id')
     findOne(@Param('id', ParseIntPipe) idTask: number, @UserDecorator('id') idUser: number): any {
-        return this.taskService.findOne(idTask, idUser);
+        return this.taskService.findOne({idTask, idUser});
     }
 
     @Post('create')
     create(@Body() dto: CreateTaskDto, @UserDecorator('id') idUser: number): Promise<any> {
-        return this.taskService.create(idUser, dto);   
+        return this.taskService.createTask(idUser, dto);
     }
 
     @Patch('update/:id')
     update(@Param('id', ParseIntPipe) idTask: number, @Body() dto: UpdateTaskDto, @UserDecorator('id') idUser: number) {
-        return this.taskService.update(idTask, dto, idUser);
+        return this.taskService.updateTask(idTask, dto, idUser);
     }
 
     @Delete('delete/:id')
     delete(@Param('id', ParseIntPipe) idTask: number, @UserDecorator('id') idUser: number): Promise<any> {
-        return this.taskService.delete(idTask, idUser);
+        return this.taskService.deleteTask(idTask, idUser);
     }
 }
