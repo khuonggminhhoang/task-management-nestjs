@@ -6,6 +6,7 @@ import { UserDecorator } from "@/user/decorator/user.decorator";
 import { OptionTaskDto } from "@/task/dto/option-task.dto";
 import { UpdateTaskDto } from "@/task/dto/update-task.dto";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import {IOption} from "@/task/interfaces/IOption.interface";
 
 @ApiBearerAuth()
 @ApiTags('Task')
@@ -15,18 +16,20 @@ export class TaskController {
     constructor(private readonly taskService: TaskService ) {}
 
     @Get()
-    findAll(@UserDecorator('id') idUser: number, @Query() dto: OptionTaskDto): Promise<any> {
-        return this.taskService.findAllTask(idUser, dto);
+    findAll(@UserDecorator('id') idUser: number, @Query() option: IOption): Promise<any> {
+        // return this.taskService.findAllTask(idUser, option);
+        return this.taskService.findAll({}, {...option, idUser: idUser})
     }
 
     @Get('detail/:id')
     findOne(@Param('id', ParseIntPipe) idTask: number, @UserDecorator('id') idUser: number): any {
-        return this.taskService.findOne({idTask, idUser});
+        return this.taskService.findOne(idTask, {idUser: idUser});
     }
 
     @Post('create')
     create(@Body() dto: CreateTaskDto, @UserDecorator('id') idUser: number): Promise<any> {
-        return this.taskService.createTask(idUser, dto);
+        // return this.taskService.createTask(idUser, dto);
+        return this.taskService.create(dto, {idUser: idUser});
     }
 
     @Patch('update/:id')
@@ -36,6 +39,6 @@ export class TaskController {
 
     @Delete('delete/:id')
     delete(@Param('id', ParseIntPipe) idTask: number, @UserDecorator('id') idUser: number): Promise<any> {
-        return this.taskService.deleteTask(idTask, idUser);
+        return this.taskService.delete(idTask, {idUser: idUser});
     }
 }

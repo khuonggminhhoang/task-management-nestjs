@@ -23,7 +23,11 @@ export class UserService extends BaseService<User>{
         return password;
     }
 
-    // get all user ở baseService có rồi
+    // find all user ở baseService có rồi
+    async actionPreFindAll({}) {
+        return {deleted: false};
+    }
+
     // Read detail, chỉ cần override hàm pre của base service, hàm findOne ở baseService có rồi
     async actionPreFindOne(id: number) {
         const user = await this.userRepository.findOne({ where: {id: id}});
@@ -38,7 +42,6 @@ export class UserService extends BaseService<User>{
     async actionPreUpdate(dto: UpdateUserDto) {
         return {...dto, updatedAt: new Date()};
     }
-
 
     // create, tương tự
     async actionPreCreate(dto: CreateUserDto) {
@@ -57,7 +60,7 @@ export class UserService extends BaseService<User>{
 
     // gen function
     async findOneElement(find: object): Promise<User> {
-        return await this.userRepository.findOne({ where: find})
+        return await this.userRepository.findOne({ where: find});
     }
 
     async save(createUser: CreateUserDto): Promise<any> {

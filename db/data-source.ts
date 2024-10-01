@@ -1,10 +1,10 @@
 import { DataSource, DataSourceOptions } from "typeorm";
 
 export const dataSourceOptions: DataSourceOptions = {
-    type: "mysql",
+    type: "postgres",
     host: "localhost",
-    port: 3306,
-    username: "root",
+    port: 5432,
+    username: "postgres",
     password: "PTITptit2021@",
     database: "task-management-nestjs",
     entities: ['dist/**/*.entity.js'],
@@ -14,4 +14,5 @@ export const dataSourceOptions: DataSourceOptions = {
 };
 
 const dataSource = new DataSource(dataSourceOptions);
+
 export default dataSource;

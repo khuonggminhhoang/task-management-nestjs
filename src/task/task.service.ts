@@ -1,44 +1,55 @@
-import { HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateTaskDto } from "@/task/dto/create-task.dto";
-import { Repository } from "typeorm";
+import {ILike, Repository} from "typeorm";
 import { Task } from "@/task/entities/task.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "@/user/entities/user.entity";
 import { paginationHelper } from "helper/pagination.helper";
 import { UpdateTaskDto } from "@/task/dto/update-task.dto";
 import {instanceToPlain} from "class-transformer";
-import {OptionTaskDto} from "@/task/dto/option-task.dto";
+import {BaseService} from "@/base/service/baseService";
+import {IOption} from "@/task/interfaces/IOption.interface";
 
 @Injectable()
-export class TaskService {
+export class TaskService extends BaseService<Task>{
     constructor(
         @InjectRepository(Task) private taskRepository: Repository<Task>,
         @InjectRepository(User) private userRepository: Repository<User>
-    ) {}
+    ) {
+        super(taskRepository);
+    }
 
-    async findAllTask(idUser: number,dto: OptionTaskDto) {
-        dto.keyword = dto.keyword || '';
-        dto.order = dto.order || 'ASC';
-        dto.sortBy = dto.sortBy || 'createdAt';
+    async actionPreFindAll(dto:Partial<Task>, option?: IOption) {
+        option.keyword = option.keyword || '';
+        option.order = option.order || 'ASC';
+        option.sortBy = option.sortBy || 'createdAt';
+        return {...option, deleted: false};
+    }
+
+    async findAll(dto:Partial<Task>, option?:IOption) {
+        const handleDto = await this.actionPreFindAll(dto, option);
 
         const [_, countRecord] = await this.taskRepository.findAndCount({
             where: {
                 deleted: false,
-                created_by: idUser
+                created_by: handleDto.idUser
             }
         });
 
-        const pagination = paginationHelper({ limit: dto.limit, page: dto.page}, countRecord);
+        const pagination = paginationHelper({ limit: handleDto.limit, page: handleDto.page}, countRecord);
 
-        const tasks = await this.taskRepository
-            .createQueryBuilder('task')
-            .where('deleted = :deleted', { deleted: false })
-            .andWhere('created_by = :idUser', { idUser: idUser })
-            .andWhere(`LOWER(title) LIKE LOWER(:keyword)`, { keyword: `%${dto.keyword}%` })
-            .orderBy( dto.sortBy, dto.order)
-            .skip(pagination['skip'])
-            .take(pagination['limit'])          // không dùng limit vì nó chỉ lấy ra n bản ghi từ đầu db thôi
-            .getMany();
+        const tasks = await this.taskRepository.find({
+            where: {
+                deleted: false,
+                created_by: handleDto.idUser,
+                title: ILike(`%${handleDto.keyword}%`),
+            },
+            order: {
+                [handleDto.sortBy]: handleDto.order
+            },
+            skip: pagination['skip'],
+            take: pagination['limit']
+        })
 
         return {
             "success": true,
@@ -51,27 +62,34 @@ export class TaskService {
         };
     }
 
-    async createTask(idUser: number, dto: CreateTaskDto): Promise<any> {
+    async actionPreCreate(dto: Partial<CreateTaskDto>) {
         let parentTask = null;
-
         if(dto.parentTaskId) {
             parentTask = await this.taskRepository.findOne({ where: {
-                id: dto.parentTaskId,
-                deleted: false
-            }});
+                    id: dto.parentTaskId,
+                    deleted: false
+                }});
 
             if(!parentTask) {
                 throw new HttpException("Not Found Parent Task", HttpStatus.NOT_FOUND);
             }
         }
 
+        return {...dto, parentTask: parentTask};
+    }
 
-        const task = this.taskRepository.create({...dto, created_by: idUser});
-        task.parentTask = parentTask != null ? parentTask : null;
+    async create(dto:Partial<Task>, option?:IOption) {
+        const handleDto = await this.actionPreCreate(dto);
+        const parentTask = handleDto.parentTask;
+        delete handleDto.parentTask;
 
-        // khai báo mảng ban đầu cho task.users vì Mảng task.users không được khởi tạo khi tạo một task mới bằng this.taskRepository.create(), vì mối quan hệ ManyToMany giữa Task và User chỉ được thiết lập sau khi lưu task vào cơ sở dữ liệu.
-        if( dto.assigned_to.length > 0) {
-            for(let userId of dto.assigned_to) {
+        const task = await this.taskRepository.create({created_by: option.idUser, ...handleDto});
+        task.parentTask = parentTask;
+        console.log(task);
+
+
+        if( handleDto.assigned_to.length > 0) {
+            for(let userId of handleDto.assigned_to) {
                 const user = await this.userRepository.findOne({
                     where: {
                         id: userId,
@@ -94,28 +112,13 @@ export class TaskService {
             "success": true,
             "statusCode": HttpStatus.CREATED,
             "message": "Resource created successfully",
-            "data": newTask
-        }
-
-    }
-
-    async findOne({idTask, idUser}): Promise<any> {
-        const task = await this.taskRepository.findOne({
-            where: {
-                id: idTask,
-                deleted: false,
-                created_by: idUser
-            }
-        });
-
-        return {
-            "success": true,
-            "statusCode": HttpStatus.OK,
-            "message": "Data retrieved successfully",
-            "data": instanceToPlain(task)
+            "data": instanceToPlain(newTask)
         }
     }
 
+    async actionPreFindOne(idTask: number, option: IOption) {
+        return {id: idTask, created_by: option.idUser, deleted: false};
+    }
 
     async updateTask(idTask: number, dto: UpdateTaskDto, idUser: number): Promise<any> {
         const task = await this.taskRepository.findOne({
@@ -171,20 +174,25 @@ export class TaskService {
         }
     }
 
-    async deleteTask(idTask: number, idUser: number): Promise<any> {
+    async actionPreDelete(id: number, option: IOption) {
         const task = await this.taskRepository.findOne({
             where: {
-                id: idTask,
+                id: id,
                 deleted: false,
-                created_by: idUser
+                created_by: option.idUser
             },
-            relations: ['users']
+            relations: ["users"]
         });
 
         if (!task) {
             throw new NotFoundException("User is not allowed to delete the record")
         }
 
+        return task;
+    }
+
+    async delete(id: number, option: IOption) {
+        const task = await this.actionPreDelete(id, option);
         await this.taskRepository.remove(task);
 
         return {

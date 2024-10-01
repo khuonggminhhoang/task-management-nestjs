@@ -6,20 +6,20 @@ export class BaseService<T> {
     constructor(protected readonly repository) {}
 
     // create
-    async actionPreCreate(dto: Partial<T>) {
+    async actionPreCreate(dto: Partial<T>, option?: object) {
         return dto;
     }
 
-    async actionPostCreate(record: T) {
+    async actionPostCreate(record: T, option?: object) {
         return record;
     }
 
-    async create(dto: Partial<T>) {
-        const handleDto =await this.actionPreCreate(dto);
+    async create(dto: Partial<T>, option?: object) {
+        const handleDto =await this.actionPreCreate(dto, option);
 
         const record = await this.repository.save(handleDto);
 
-        const element = await this.actionPostCreate(record);
+        const element = await this.actionPostCreate(record, option);
 
         return {
             "success": true,
@@ -30,20 +30,20 @@ export class BaseService<T> {
     }
 
     // read
-    async actionPreFindAll(dto: Partial<T>) {
+    async actionPreFindAll(dto: Partial<T>, option?: object) {
         return dto;
     }
 
-    async actionGetFindAll(records: T[]) {
+    async actionGetFindAll(records: T[], option?: object) {
         return records;
     }
 
-    async findAll(dto: Partial<T>) {
-        const handleDto = await this.actionPreFindAll(dto);
+    async findAll(dto: Partial<T>, option?: object) {
+        const handleDto = await this.actionPreFindAll(dto, option);
 
-        const records = await this.repository.find({...handleDto, deleted: false});
+        const records = await this.repository.find({where: {...handleDto}});
 
-        const array = await this.actionGetFindAll(records);
+        const array = await this.actionGetFindAll(records, option);
 
         return {
             "success": true,
@@ -54,20 +54,20 @@ export class BaseService<T> {
     }
 
     // read detail
-    async actionPreFindOne(id: any) {
+    async actionPreFindOne(id: any, option?: object) {
         return id;
     }
 
-    async actionGetFindOne(record: T) {
+    async actionGetFindOne(record: T, option?: object) {
         return record;
     }
 
-    async findOne(id: any) {
-        const handleId = await this.actionPreFindOne(id);
+    async findOne(id: any, option?: object) {
+        const handleFind = await this.actionPreFindOne(id, option);
 
-        const record = await this.repository.findOne({where: {id: handleId, deleted: false}});
+        const record = await this.repository.findOne({where: handleFind});
 
-        const element = await this.actionGetFindOne(record);
+        const element = await this.actionGetFindOne(record, option);
 
         return {
             "success": true,
@@ -78,20 +78,20 @@ export class BaseService<T> {
     }
 
     // update
-    async actionPreUpdate(dto: Partial<T>) {
+    async actionPreUpdate(dto: Partial<T>, option?: object) {
         return dto;
     }
 
-    async actionPatchUpdate(record: T) {
+    async actionPatchUpdate(record: T, option?: object) {
         return record;
     }
 
-    async update(id: any, dto: Partial<T>) {
-        const handleDto = await this.actionPreUpdate(dto);
+    async update(id: any, dto: Partial<T>, option?: object) {
+        const handleDto = await this.actionPreUpdate(dto, option);
 
         const record = await this.repository.update({id: id}, handleDto);
 
-        await this.actionPatchUpdate(record);
+        await this.actionPatchUpdate(record, option);
 
         return {
             "success": true,
@@ -101,19 +101,19 @@ export class BaseService<T> {
     }
 
     // delete
-    async actionPreDelete(id: any) {
+    async actionPreDelete(id: any, option?: object) {
         return id;
     }
 
-    async actionDelete() {
+    async actionDelete(option?: object) {
     }
 
-    async delete(id: any) {
-        const handleId = await this.actionPreDelete(id);
+    async delete(id: any, option?: object) {
+        const handleId = await this.actionPreDelete(id, option);
 
         await this.repository.delete(handleId);
 
-        await this.actionDelete();
+        await this.actionDelete(option);
 
         return {
             "success": true,
