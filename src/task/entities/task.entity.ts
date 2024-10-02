@@ -36,6 +36,9 @@ export class Task {
     @UpdateDateColumn()
     updatedAt: Date;
 
+    @Column({default: false})
+    isNotified: boolean
+
     @OneToMany(() => Task, (task) => task.parentTask, {nullable: true})
     @Exclude()
     childTasks: Task[];

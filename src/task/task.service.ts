@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
+import {HttpException, HttpStatus, Injectable, NotFoundException} from "@nestjs/common";
 import { CreateTaskDto } from "@/task/dto/create-task.dto";
 import {ILike, Repository} from "typeorm";
 import { Task } from "@/task/entities/task.entity";
@@ -9,15 +9,55 @@ import { UpdateTaskDto } from "@/task/dto/update-task.dto";
 import {instanceToPlain} from "class-transformer";
 import {BaseService} from "@/base/service/baseService";
 import {IOption} from "@/task/interfaces/IOption.interface";
+import {Cron} from '@nestjs/schedule';
+import {EventEmitter2} from "@nestjs/event-emitter";
 
 @Injectable()
 export class TaskService extends BaseService<Task>{
     constructor(
         @InjectRepository(Task) private taskRepository: Repository<Task>,
-        @InjectRepository(User) private userRepository: Repository<User>
+        @InjectRepository(User) private userRepository: Repository<User>,
+        private readonly eventEmitter: EventEmitter2
     ) {
         super(taskRepository);
     }
+
+
+
+    // scron jobs
+    @Cron('* * * * * *')
+    async handleCron() {
+        const tasks = await this.taskRepository.find({relations: ['users']});
+
+        type Info = {
+            task: Partial<Task>,
+            ownerTask: string[]
+        }
+
+        let data: Info[] = [];
+        for(let task of tasks) {
+            const time = new Date(task.time_finish).getTime() - Date.now();
+            if(time < 30 * 60 * 1000) {                                                             // nếu time < 30 phút thì báo cho user
+                const _task: Partial<Task> = instanceToPlain(task);
+                const _ownerTask: string[] = task.users.map(item => item.email);
+                data.push({task: _task, ownerTask: _ownerTask});
+            }
+        }
+
+        // await this.taskQueue.add('name job',{content: contentTest});                     // có thể truyền name job vào để process xử lý
+        this.eventEmitter.emit('task.remind', data);           // --> boolean
+
+    }
+
+    // @Timeout(5000)
+    // handleTimeout() {
+    //     console.log("Chạy time out sau 5s");
+    // }
+    //
+    // @Interval(2000)
+    // handleInterval() {
+    //     console.log("Chạy inteval sau mỗi 3s");
+    // }
 
     async actionPreFindAll(dto:Partial<Task>, option?: IOption) {
         option.keyword = option.keyword || '';

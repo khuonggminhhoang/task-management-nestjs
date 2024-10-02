@@ -1,11 +1,12 @@
 import {HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "@/user/entities/user.entity";
-import { DeleteResult, Repository, UpdateResult } from "typeorm";
+import { Repository } from "typeorm";
 import { CreateUserDto } from "@/user/dto/create-user.dto";
 import * as bcrypt from 'bcrypt';
 import {BaseService} from "@/base/service/baseService";
 import {UpdateUserDto} from "@/user/dto/update-user.dto";
+
 
 @Injectable()
 export class UserService extends BaseService<User>{
@@ -66,5 +67,4 @@ export class UserService extends BaseService<User>{
     async save(createUser: CreateUserDto): Promise<any> {
         return await this.userRepository.save(createUser);
     }
-
 }

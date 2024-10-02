@@ -1,4 +1,6 @@
 import * as dotenv from 'dotenv';
+// import * as process from "node:process";
+
 dotenv.config();
 
 export class Config {
@@ -12,8 +14,12 @@ export class Config {
     smtpUsername = process.env.SMTP_USERNAME;
     smtpUserpass = process.env.SMTP_PASSWORD;
 
-    //otp
+    // otp
     otpSecretKey = process.env.OTP_SECRET_KEY;
+
+    // redis
+    REDIS_HOST = process.env.REDIS_HOST ?? "localhost";
+    REDIS_PORT = +process.env.REDIS_PORT ?? 6379;
 
     PORT = +process.env.PORT ?? 3000;
 }

@@ -97,7 +97,7 @@ export class AuthService {
         totp.options = { digits: 8, step: 60 };
         const otp = totp.generate(secret);
 
-        const subject = '[TASK] OTP đổi mật khẩu'
+        const subject = '[TASK] OTP đổi mật khẩu';
         const html = `
                     Mã OTP của bạn: 
                     <b>${otp}</b>. 
@@ -105,7 +105,7 @@ export class AuthService {
                     Lưu ý: OTP chỉ có hiệu lực trong 60s
                     <hr>
                     FACEBOOK: <a href='https://www.facebook.com/khuongminhminh.hoang/'> [ADMIN]
-            `
+            `;
 
         await this.mailService.sendMail(email, subject, html);
 
