@@ -36,11 +36,14 @@ export class TaskService extends BaseService<Task>{
 
         let data: Info[] = [];
         for(let task of tasks) {
-            const time = new Date(task.time_finish).getTime() - Date.now();
-            if(time < 30 * 60 * 1000) {                                                             // nếu time < 30 phút thì báo cho user
-                const _task: Partial<Task> = instanceToPlain(task);
-                const _ownerTask: string[] = task.users.map(item => item.email);
-                data.push({task: _task, ownerTask: _ownerTask});
+            if(!task.isNotified) {
+                const time = new Date(task.time_finish).getTime() - Date.now();
+                if(time < 30 * 60 * 1000) {                                                             // nếu time < 30 phút thì báo cho user
+                    const _task: Partial<Task> = instanceToPlain(task);
+                    const _ownerTask: string[] = task.users.map(item => item.email);
+                    data.push({task: _task, ownerTask: _ownerTask});
+                }
+                await this.taskRepository.update({id: task.id}, {isNotified: true});
             }
         }
 
