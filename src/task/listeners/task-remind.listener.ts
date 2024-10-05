@@ -17,7 +17,5 @@ export class TaskRemindListener {
                 await this.taskQueue.add({task: task, email: email});
             }
         }
-
-
     }
 }

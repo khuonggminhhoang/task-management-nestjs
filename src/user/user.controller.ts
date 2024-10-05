@@ -1,16 +1,35 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards, UseInterceptors } from "@nestjs/common";
+import {
+    Body,
+    Controller,
+    Delete, FileTypeValidator,
+    Get, MaxFileSizeValidator,
+    Param, ParseFilePipe,
+    ParseIntPipe,
+    Patch,
+    Post,
+    UploadedFile,
+    UseGuards,
+    UseInterceptors
+} from "@nestjs/common";
 import { UserService } from "@/user/user.service";
 import { UpdateUserDto } from "@/user/dto/update-user.dto";
 import { CreateUserDto } from "@/user/dto/create-user.dto";
 import { AuthGuard} from "@nestjs/passport";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import {UserDecorator} from "@/user/decorator/user.decorator";
+import {FileInterceptor} from "@nestjs/platform-express";
+import {AvatarValidatePipe} from "@/../validate/avatar.validate";
+import {CloudinaryService} from "@/cloudinary/cloudinary.service";
 
 @ApiBearerAuth()
 @ApiTags('User')
 @UseGuards(AuthGuard('jwt'))
 @Controller('api/v1/users')
 export class UserController {
-    constructor(private readonly userService: UserService) {}
+    constructor(
+        private readonly userService: UserService,
+        private readonly cloudinaryService: CloudinaryService
+    ) {}
 
     @Get()
     findAll(): Promise<any> {
@@ -35,6 +54,13 @@ export class UserController {
     @Delete('delete/:id')
     delete(@Param('id',ParseIntPipe) id: number): Promise<any> {
         return this.userService.delete(id);
+    }
+
+    @Post('upload')
+    @UseInterceptors(FileInterceptor('avatar'))
+    async uploadAvatar(@UserDecorator('id', ParseIntPipe) id: number,  @UploadedFile(AvatarValidatePipe) file: Express.Multer.File) {
+        const urlImage = await this.cloudinaryService.uploadImage(file);
+        return this.userService.uploadAvatar(id, urlImage);
     }
 
 }

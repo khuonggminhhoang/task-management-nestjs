@@ -12,7 +12,7 @@ import {UpdateUserDto} from "@/user/dto/update-user.dto";
 export class UserService extends BaseService<User>{
     constructor(
         @InjectRepository(User)
-        private userRepository: Repository<User>,
+        private userRepository: Repository<User>
     ) {
         super(userRepository);
     }
@@ -66,5 +66,19 @@ export class UserService extends BaseService<User>{
 
     async save(createUser: CreateUserDto): Promise<any> {
         return await this.userRepository.save(createUser);
+    }
+
+    // upload avatar
+    async uploadAvatar(id: number, urlImage: string) {
+        await this.userRepository.update({id: id}, {avatar: urlImage});
+
+        return {
+            "success": true,
+            "statusCode": HttpStatus.OK,
+            "message": "upload avatar successfully",
+            "data": {
+                img: urlImage
+            }
+        }
     }
 }

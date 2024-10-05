@@ -1,4 +1,5 @@
 import * as dotenv from 'dotenv';
+import * as process from "node:process";
 // import * as process from "node:process";
 
 dotenv.config();
@@ -20,6 +21,11 @@ export class Config {
     // redis
     REDIS_HOST = process.env.REDIS_HOST ?? "localhost";
     REDIS_PORT = +process.env.REDIS_PORT ?? 6379;
+
+    // cloudinary
+    cloudinaryName = process.env.CLOUDINARY_NAME;
+    cloudinaryApiKey = process.env.CLOUDINARY_API_KEY;
+    cloudinaryApiSecret = process.env.CLOUDINARY_API_SECRET;
 
     PORT = +process.env.PORT ?? 3000;
 }
