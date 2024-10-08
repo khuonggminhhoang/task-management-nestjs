@@ -11,6 +11,7 @@ import { config } from 'config/system.config';
 import {ScheduleModule} from "@nestjs/schedule";
 import {BullModule} from "@nestjs/bull";
 import {EventEmitterModule} from "@nestjs/event-emitter";
+import {CollectionModule} from "@/collection/collection.module";
 
 @Module({
   imports: [ 
@@ -29,7 +30,8 @@ import {EventEmitterModule} from "@nestjs/event-emitter";
     EventEmitterModule.forRoot(),                   // xử lý Event (https://docs.nestjs.com/techniques/events)
     UserModule,
     AuthModule,
-    TaskModule
+    TaskModule,
+    CollectionModule
   ],
   controllers: [AppController],
   providers: [AppService],

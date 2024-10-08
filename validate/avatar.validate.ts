@@ -1,20 +1,24 @@
-import {ArgumentMetadata, Injectable, PipeTransform} from "@nestjs/common";
+import {ArgumentMetadata, HttpException, HttpStatus, Injectable, PipeTransform} from "@nestjs/common";
 
 @Injectable()
 export class AvatarValidatePipe implements PipeTransform {
     transform(file: any, metadata: ArgumentMetadata) {
+        this.validateImage(file);
+        return file;
+    }
+
+    validateImage(file: Express.Multer.File) {
         if(!file) {
-            throw new Error('Not file to upload');
+            throw new HttpException('Not file to upload', HttpStatus.BAD_REQUEST);
         }
 
         if(file.size > 5 * 1024 * 1024) {
-            throw new Error("File must be less than 5MB");
+            throw new HttpException("File must be less than 5MB", HttpStatus.BAD_REQUEST);
         }
 
         if(!file.mimetype.match('image/*')) {               // check file ảnh
-            throw new Error("File must be ext is .png|.jpeg|.jpg");
+            throw new HttpException("File must be ext is .png|.jpeg|.jpg", HttpStatus.BAD_REQUEST);
         }
-
-        return file;
     }
+
 }

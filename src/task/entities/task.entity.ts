@@ -1,12 +1,10 @@
 import { User } from "@/user/entities/user.entity";
-import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany } from "typeorm";
 import {Exclude} from "class-transformer";
+import {BaseEntity} from "@/base/entity/base.entity";
 
 @Entity()
-export class Task {
-    @PrimaryGeneratedColumn()
-    id: number;
-
+export class Task extends BaseEntity {
     @Column({ length: 100 })
     title: string;
 
@@ -29,12 +27,6 @@ export class Task {
     @Column()
     @Exclude()
     created_by: number;
-
-    @CreateDateColumn()
-    createdAt: Date;
-
-    @UpdateDateColumn()
-    updatedAt: Date;
 
     @Column({default: false})
     isNotified: boolean

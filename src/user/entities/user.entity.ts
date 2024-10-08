@@ -1,12 +1,17 @@
 import { Task } from "@/task/entities/task.entity";
-import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import {
+    Column,
+    Entity,
+    JoinTable,
+    ManyToMany,
+    OneToMany,
+} from "typeorm";
 import {Exclude} from "class-transformer";
+import {BaseEntity} from "@/base/entity/base.entity";
+import {Collection} from "@/collection/entities/collection.entity";
 
 @Entity()
-export class User {
-    @PrimaryGeneratedColumn()
-    id: number;
-
+export class User extends BaseEntity{
     @Column()
     full_name: string;
 
@@ -24,20 +29,14 @@ export class User {
     gender: boolean;
 
     @Exclude()
-    @Column({default: false})
-    deleted: boolean;
-
-    @Exclude()
     @Column({default: ""})
     refresh_token: string
-
-    @CreateDateColumn()
-    createdAt: Date;
-
-    @UpdateDateColumn()
-    updatedAt: Date;
 
     @ManyToMany(() => Task, (task) => task.users)
     @JoinTable()                                        // join bảng đặt bên nào cũng được
     tasks: Task[];
+
+    @OneToMany(() => Collection, (collection) => collection.user)
+    @Exclude()
+    collections: Collection[]
 }

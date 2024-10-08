@@ -1,9 +1,9 @@
 import {
     Body,
     Controller,
-    Delete, FileTypeValidator,
-    Get, MaxFileSizeValidator,
-    Param, ParseFilePipe,
+    Delete,
+    Get,
+    Param,
     ParseIntPipe,
     Patch,
     Post,
@@ -56,7 +56,7 @@ export class UserController {
         return this.userService.delete(id);
     }
 
-    @Post('upload')
+    @Post('upload/avatar')
     @UseInterceptors(FileInterceptor('avatar'))
     async uploadAvatar(@UserDecorator('id', ParseIntPipe) id: number,  @UploadedFile(AvatarValidatePipe) file: Express.Multer.File) {
         const urlImage = await this.cloudinaryService.uploadImage(file);
