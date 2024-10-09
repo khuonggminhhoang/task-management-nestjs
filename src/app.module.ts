@@ -1,17 +1,18 @@
 import { Module } from '@nestjs/common';
 import { AppController } from '@/app.controller';
 import { AppService } from '@/app.service';
-import { UserModule } from '@/user/user.module';
+import { UserModule } from '@/module/user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from '@/auth/auth.module';
+import { AuthModule } from '@/module/auth/auth.module';
 import { dataSourceOptions } from 'db/data-source';
 import { JwtModule } from '@nestjs/jwt';
-import { TaskModule } from '@/task/task.module';
+import { TaskModule } from '@/module/task/task.module';
 import { config } from 'config/system.config';
 import {ScheduleModule} from "@nestjs/schedule";
 import {BullModule} from "@nestjs/bull";
 import {EventEmitterModule} from "@nestjs/event-emitter";
-import {CollectionModule} from "@/collection/collection.module";
+import {CollectionModule} from "@/module/collection/collection.module";
+import {CuslogModule} from "@/common/cuslog/cuslog.module";
 
 @Module({
   imports: [ 
@@ -31,7 +32,8 @@ import {CollectionModule} from "@/collection/collection.module";
     UserModule,
     AuthModule,
     TaskModule,
-    CollectionModule
+    CollectionModule,
+    CuslogModule                                    // logger
   ],
   controllers: [AppController],
   providers: [AppService],

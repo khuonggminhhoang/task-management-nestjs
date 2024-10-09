@@ -1,12 +1,11 @@
 import {Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from "@nestjs/common";
-import { TaskService } from "@/task/task.service";
+import { TaskService } from "@/module/task/task.service";
 import  { AuthGuard} from "@nestjs/passport";
-import { CreateTaskDto } from "@/task/dto/create-task.dto";
-import { UserDecorator } from "@/user/decorator/user.decorator";
-import { OptionTaskDto } from "@/task/dto/option-task.dto";
-import { UpdateTaskDto } from "@/task/dto/update-task.dto";
+import { CreateTaskDto } from "@/module/task/dto/create-task.dto";
+import { UserDecorator } from "@/module/user/decorator/user.decorator";
+import { UpdateTaskDto } from "@/module/task/dto/update-task.dto";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
-import {IOption} from "@/task/interfaces/IOption.interface";
+import {IOption} from "@/module/task/interfaces/IOption.interface";
 
 @ApiBearerAuth()
 @ApiTags('Task')

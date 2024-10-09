@@ -1,10 +1,10 @@
 import {Controller, ParseIntPipe, Post, UploadedFiles, UseGuards, UseInterceptors} from "@nestjs/common";
 import {FilesInterceptor} from "@nestjs/platform-express";
-import {ImageValidatePipe} from "../../validate/image.validate";
-import {CollectionService} from "@/collection/collection.service";
+import {CollectionService} from "@/module/collection/collection.service";
 import {CloudinaryService} from "@/cloudinary/cloudinary.service";
 import {AuthGuard} from "@nestjs/passport";
-import {UserDecorator} from "@/user/decorator/user.decorator";
+import {UserDecorator} from "@/module/user/decorator/user.decorator";
+import {ImageValidatePipe} from "../../../validate/image.validate";
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('api/v1/collection')

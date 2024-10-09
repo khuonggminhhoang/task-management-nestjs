@@ -1,15 +1,24 @@
-import {HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException} from "@nestjs/common";
+import {
+    HttpException,
+    HttpStatus,
+    Injectable,
+    InternalServerErrorException,
+    Logger,
+    NotFoundException
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { User } from "@/user/entities/user.entity";
+import { User } from "@/module/user/entities/user.entity";
 import { Repository } from "typeorm";
-import { CreateUserDto } from "@/user/dto/create-user.dto";
+import { CreateUserDto } from "@/module/user/dto/create-user.dto";
 import * as bcrypt from 'bcrypt';
 import {BaseService} from "@/base/service/baseService";
-import {UpdateUserDto} from "@/user/dto/update-user.dto";
+import {UpdateUserDto} from "@/module/user/dto/update-user.dto";
 
 
 @Injectable()
 export class UserService extends BaseService<User>{
+    private logger: Logger = new Logger(UserService.name);
+
     constructor(
         @InjectRepository(User)
         private userRepository: Repository<User>
@@ -26,6 +35,7 @@ export class UserService extends BaseService<User>{
 
     // find all user ở baseService có rồi
     async actionPreFindAll({}) {
+        this.logger.log("tesst error", "hehe");
         return {deleted: false};
     }
 

@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
-import { AuthController } from "@/auth/auth.controller";
-import { AuthService } from "@/auth/auth.service";
-import { UserModule } from "@/user/user.module";
+import { AuthController } from "@/module/auth/auth.controller";
+import { AuthService } from "@/module/auth/auth.service";
+import { UserModule } from "@/module/user/user.module";
 import { MailModule } from "@/common/mail/mail.module";
 import { JwtStrategy } from "@/jwt/jwt.strategy";
 

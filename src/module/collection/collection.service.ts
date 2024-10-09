@@ -1,8 +1,8 @@
 import {HttpStatus, Injectable} from "@nestjs/common";
 import {InjectRepository} from "@nestjs/typeorm";
-import {Collection} from "@/collection/entities/collection.entity";
+import {Collection} from "@/module/collection/entities/collection.entity";
 import {Repository} from "typeorm";
-import {User} from "@/user/entities/user.entity";
+import {User} from "@/module/user/entities/user.entity";
 import {instanceToPlain} from "class-transformer";
 
 @Injectable()

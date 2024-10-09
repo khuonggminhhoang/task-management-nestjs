@@ -1,4 +1,4 @@
-import { User } from "@/user/entities/user.entity";
+import { User } from "@/module/user/entities/user.entity";
 import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany } from "typeorm";
 import {Exclude} from "class-transformer";
 import {BaseEntity} from "@/base/entity/base.entity";

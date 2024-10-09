@@ -1,6 +1,6 @@
 import {Column, Entity, ManyToOne} from "typeorm";
 import {BaseEntity} from "@/base/entity/base.entity";
-import {User} from "@/user/entities/user.entity";
+import {User} from "@/module/user/entities/user.entity";
 import {Exclude} from "class-transformer";
 
 @Entity()

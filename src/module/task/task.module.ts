@@ -1,13 +1,13 @@
 import { Module } from "@nestjs/common";
-import { TaskController } from "@/task/task.controller";
-import { TaskService } from "@/task/task.service";
+import { TaskController } from "@/module/task/task.controller";
+import { TaskService } from "@/module/task/task.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { Task } from "@/task/entities/task.entity";
-import { User } from "@/user/entities/user.entity";
+import { Task } from "@/module/task/entities/task.entity";
+import { User } from "@/module/user/entities/user.entity";
 import {MailModule} from "@/common/mail/mail.module";
 import {BullModule} from "@nestjs/bull";
-import {TaskProcessor} from "@/task/process/task-queue.process";
-import {TaskRemindListener} from "@/task/listeners/task-remind.listener";
+import {TaskProcessor} from "@/module/task/process/task-queue.process";
+import {TaskRemindListener} from "@/module/task/listeners/task-remind.listener";
 
 @Module({
     imports: [

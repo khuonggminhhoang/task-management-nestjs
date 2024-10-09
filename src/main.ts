@@ -4,9 +4,15 @@ import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { config } from 'config/system.config';
 import { AllExceptionsFilter } from 'filter/all-exception.filter';
+import {CuslogService} from "@/common/cuslog/cuslog.service";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    // bufferLogs: true
+    logger: new CuslogService()
+  });
+
+  // app.useLogger(app.get(CuslogService));
 
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
@@ -23,7 +29,7 @@ async function bootstrap() {
     .addTag('Task')
     .addBearerAuth()
     .build();
-
+ 
   const document = SwaggerModule.createDocument(app, configg);
   SwaggerModule.setup('api', app, document); 
   

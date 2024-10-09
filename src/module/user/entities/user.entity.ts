@@ -1,4 +1,4 @@
-import { Task } from "@/task/entities/task.entity";
+import { Task } from "@/module/task/entities/task.entity";
 import {
     Column,
     Entity,
@@ -8,7 +8,7 @@ import {
 } from "typeorm";
 import {Exclude} from "class-transformer";
 import {BaseEntity} from "@/base/entity/base.entity";
-import {Collection} from "@/collection/entities/collection.entity";
+import {Collection} from "@/module/collection/entities/collection.entity";
 
 @Entity()
 export class User extends BaseEntity{

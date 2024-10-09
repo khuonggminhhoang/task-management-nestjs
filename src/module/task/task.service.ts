@@ -1,14 +1,14 @@
 import {HttpException, HttpStatus, Injectable, NotFoundException} from "@nestjs/common";
-import { CreateTaskDto } from "@/task/dto/create-task.dto";
+import { CreateTaskDto } from "@/module/task/dto/create-task.dto";
 import {ILike, Repository} from "typeorm";
-import { Task } from "@/task/entities/task.entity";
+import { Task } from "@/module/task/entities/task.entity";
 import { InjectRepository } from "@nestjs/typeorm";
-import { User } from "@/user/entities/user.entity";
+import { User } from "@/module/user/entities/user.entity";
 import { paginationHelper } from "helper/pagination.helper";
-import { UpdateTaskDto } from "@/task/dto/update-task.dto";
+import { UpdateTaskDto } from "@/module/task/dto/update-task.dto";
 import {instanceToPlain} from "class-transformer";
 import {BaseService} from "@/base/service/baseService";
-import {IOption} from "@/task/interfaces/IOption.interface";
+import {IOption} from "@/module/task/interfaces/IOption.interface";
 import {Cron} from '@nestjs/schedule';
 import {EventEmitter2} from "@nestjs/event-emitter";
 

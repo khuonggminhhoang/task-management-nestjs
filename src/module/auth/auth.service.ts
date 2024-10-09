@@ -1,14 +1,14 @@
 import { ConflictException, HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { CreateUserDto } from "@/user/dto/create-user.dto";
-import { LoginUserDto } from "@/user/dto/login-user.dto";
-import { UserService } from "@/user/user.service";
+import { CreateUserDto } from "@/module/user/dto/create-user.dto";
+import { LoginUserDto } from "@/module/user/dto/login-user.dto";
+import { UserService } from "@/module/user/user.service";
 import * as bcrypt from "bcrypt";
 import hashPasswordHelper from "helper/hash-password.helper";
 import { totp } from 'otplib';
 import { MailService } from "@/common/mail/mail.service";
-import { ResetPasswordDto } from "@/auth/dto/reset-password.dto";
-import { ChangePasswordDto } from "@/auth/dto/change-password.dto";
+import { ResetPasswordDto } from "@/module/auth/dto/reset-password.dto";
+import { ChangePasswordDto } from "@/module/auth/dto/change-password.dto";
 import { config } from "config/system.config";
 
 @Injectable()

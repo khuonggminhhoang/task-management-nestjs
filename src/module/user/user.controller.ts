@@ -11,12 +11,12 @@ import {
     UseGuards,
     UseInterceptors
 } from "@nestjs/common";
-import { UserService } from "@/user/user.service";
-import { UpdateUserDto } from "@/user/dto/update-user.dto";
-import { CreateUserDto } from "@/user/dto/create-user.dto";
+import { UserService } from "@/module/user/user.service";
+import { UpdateUserDto } from "@/module/user/dto/update-user.dto";
+import { CreateUserDto } from "@/module/user/dto/create-user.dto";
 import { AuthGuard} from "@nestjs/passport";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
-import {UserDecorator} from "@/user/decorator/user.decorator";
+import {UserDecorator} from "@/module/user/decorator/user.decorator";
 import {FileInterceptor} from "@nestjs/platform-express";
 import {AvatarValidatePipe} from "@/../validate/avatar.validate";
 import {CloudinaryService} from "@/cloudinary/cloudinary.service";
