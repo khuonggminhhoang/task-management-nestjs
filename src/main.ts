@@ -4,15 +4,12 @@ import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { config } from 'config/system.config';
 import { AllExceptionsFilter } from 'filter/all-exception.filter';
-import {CuslogService} from "@/common/cuslog/cuslog.service";
+import {LoggingService} from "@/common/logging/logging.service";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    // bufferLogs: true
-    logger: new CuslogService()
+    logger: new LoggingService()
   });
-
-  // app.useLogger(app.get(CuslogService));
 
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,

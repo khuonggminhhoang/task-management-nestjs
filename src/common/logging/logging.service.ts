@@ -1,15 +1,15 @@
-import {Injectable, Logger, LoggerService} from "@nestjs/common";
+import {Injectable, LoggerService} from "@nestjs/common";
 import * as log4js from "log4js";
 
 @Injectable()
-export class CuslogService implements LoggerService {
+export class LoggingService implements LoggerService {
     private logger: log4js.Logger;
 
     constructor() {
         log4js.configure({
            appenders: {
                out: { type: "stdout"},
-               app: { type: "file", filename: "application.log"}
+               app: { type: "file", filename: "./log/app.log"}
            },
             categories: {
                default: { appenders: ["out", "app"], level: "debug"}
@@ -24,24 +24,24 @@ export class CuslogService implements LoggerService {
         this.logger.log(message, optionalParams);
     }
 
-    error(message: any, ...optionalParams: any[]) {
-        // throw new Error("Method not implemented.");
+    error(message: any, trace: string, ...optionalParams: any[]) {
+        this.logger.error(message, trace, optionalParams);
     }
 
     warn(message: any, ...optionalParams: any[]) {
-        // throw new Error("Method not implemented.");
+        this.logger.warn(message, ...optionalParams);
     }
 
     debug?(message: any, ...optionalParams: any[]) {
-        // throw new Error("Method not implemented.");
+        this.logger.debug(message, ...optionalParams);
     }
 
     verbose?(message: any, ...optionalParams: any[]) {
-        // throw new Error("Method not implemented.");
+        this.logger.info(message, ...optionalParams);
     }
 
     fatal?(message: any, ...optionalParams: any[]) {
-        // throw new Error("Method not implemented.");
+        this.logger.fatal(message, ...optionalParams);
     }
 
     // setLogLevels?(levels: LogLevel[]) {

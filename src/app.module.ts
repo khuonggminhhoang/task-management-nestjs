@@ -12,7 +12,7 @@ import {ScheduleModule} from "@nestjs/schedule";
 import {BullModule} from "@nestjs/bull";
 import {EventEmitterModule} from "@nestjs/event-emitter";
 import {CollectionModule} from "@/module/collection/collection.module";
-import {CuslogModule} from "@/common/cuslog/cuslog.module";
+import {LoggingModule} from "@/common/logging/logging.module";
 
 @Module({
   imports: [ 
@@ -33,7 +33,7 @@ import {CuslogModule} from "@/common/cuslog/cuslog.module";
     AuthModule,
     TaskModule,
     CollectionModule,
-    CuslogModule                                    // logger
+    LoggingModule                                    // logger
   ],
   controllers: [AppController],
   providers: [AppService],
