@@ -13,6 +13,7 @@ import {BullModule} from "@nestjs/bull";
 import {EventEmitterModule} from "@nestjs/event-emitter";
 import {CollectionModule} from "@/module/collection/collection.module";
 import {LoggingModule} from "@/common/logging/logging.module";
+import {FileModule} from "@/module/file/file.module";
 
 @Module({
   imports: [ 
@@ -33,7 +34,8 @@ import {LoggingModule} from "@/common/logging/logging.module";
     AuthModule,
     TaskModule,
     CollectionModule,
-    LoggingModule                                    // logger
+    LoggingModule,                                    // logger
+    FileModule
   ],
   controllers: [AppController],
   providers: [AppService],

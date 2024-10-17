@@ -2,7 +2,6 @@ import {
     HttpException,
     HttpStatus,
     Injectable,
-    InternalServerErrorException,
     Logger,
     NotFoundException
 } from "@nestjs/common";
@@ -27,7 +26,7 @@ export class UserService extends BaseService<User>{
     }
 
     // private method
-    private async hashPassword(plaintextPassword: string): Promise<string> {
+    public async hashPassword(plaintextPassword: string): Promise<string> {
         const salt = await bcrypt.genSalt(10);
         const password = await bcrypt.hash(plaintextPassword, salt);
         return password;

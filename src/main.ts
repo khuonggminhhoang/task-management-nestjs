@@ -24,6 +24,8 @@ async function bootstrap() {
     .addTag('User')
     .addTag('Auth')
     .addTag('Task')
+      .addTag('File')
+      .addTag('Collection')
     .addBearerAuth()
     .build();
  

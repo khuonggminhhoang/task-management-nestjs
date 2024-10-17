@@ -5,9 +5,12 @@ import {CloudinaryService} from "@/cloudinary/cloudinary.service";
 import {AuthGuard} from "@nestjs/passport";
 import {UserDecorator} from "@/module/user/decorator/user.decorator";
 import {ImageValidatePipe} from "../../../validate/image.validate";
+import {ApiBearerAuth, ApiBody, ApiConsumes, ApiTags} from "@nestjs/swagger";
 
-@UseGuards(AuthGuard('jwt'))
 @Controller('api/v1/collection')
+@UseGuards(AuthGuard('jwt'))
+@ApiTags('Collection')
+@ApiBearerAuth()
 export class CollectionController {
     constructor(
         private readonly collectionService: CollectionService,
@@ -16,6 +19,22 @@ export class CollectionController {
 
     @Post('upload/images')
     @UseInterceptors(FilesInterceptor('images'))
+    @ApiConsumes('multipart/form-data')
+    @ApiBody({
+        description: 'List of images',
+        schema: {
+            type: 'object',
+            properties: {
+                images: {
+                    type: 'array',
+                    items: {
+                        type: 'string',
+                        format: 'binary'
+                    }
+                }
+            }
+        }
+    })
     async uploadMultiImage(@UserDecorator('id', ParseIntPipe) idUser: number, @UploadedFiles(ImageValidatePipe) images: Express.Multer.File[]) {
         let urls: string[] = [];
         for(let image of images) {

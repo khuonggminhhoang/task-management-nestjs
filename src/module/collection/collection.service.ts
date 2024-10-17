@@ -29,6 +29,4 @@ export class CollectionService {
             "data": data
         }
     }
-
-
 }
